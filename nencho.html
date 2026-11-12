@@ -99,6 +99,16 @@
     .foot, .act, .noprint { display: none !important; }
     .doc, .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
   }
+
+  .send { margin-top: 16px; background: #f3f8f4; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .send label { font-size: .82rem; font-weight: bold; color: var(--brand-dk); display: block; margin-bottom: 6px; }
+  .send input { width: 100%; font-size: 1rem; padding: 9px 10px; border: 1px solid #c9d6cc; border-radius: 8px; font-family: inherit; }
+  .send .row { display: flex; gap: 8px; margin-top: 10px; }
+  .send button { flex: 1; padding: 12px 8px; border: none; border-radius: 10px; font-size: .92rem; font-weight: bold; cursor: pointer; font-family: inherit; }
+  .send .line { background: #06c755; color: #fff; }
+  .send .copy { background: #e8eee9; color: var(--ink); }
+  .send .hint { font-size: .74rem; color: #6f7b73; margin-top: 8px; line-height: 1.6; }
+  @media print { .send { display: none !important; } }
 </style>
 </head>
 <body>
@@ -327,7 +337,7 @@ function render() {
 }
 
 const answersHtml = () => `<div class="sec"><div class="sec-t">あなたの回答</div><div class="answers">${state.answers.map(a => '・' + a).join('<br>')}</div></div>`;
-const actions = () => `<div class="act"><button class="main" onclick="window.print()">🖨 印刷する</button><button class="sub" onclick="restart()">↺ 最初から</button></div>`;
+const actions = () => sendBox() + `<div class="act"><button class="main" onclick="window.print()">🖨 印刷する</button><button class="sub" onclick="restart()">↺ 最初から</button></div>`;
 const foot = () => `<div class="foot"><button class="link" onclick="back()">← 前の質問に戻る</button></div>`;
 const req = (label, note, tag) => `<div class="doc req"><span class="ic">📄</span><span>${label}${tag ? `<span class="tag">${tag}</span>` : ''}${note ? `<small>${note}</small>` : ''}</span></div>`;
 const att = (label, note) => `<div class="doc att"><span class="ic">📎</span><span>${label}${note ? `<small>${note}</small>` : ''}</span></div>`;
@@ -415,6 +425,54 @@ function renderResult(card) {
       ${answersHtml()}
       ${actions()}
     </div>${foot()}`;
+}
+
+const NAVI_NAME = '年末調整ナビ';
+// ===== 結果を事務所へ送る（LINE） =====
+let savedName = '';
+try { savedName = localStorage.getItem('navi_name') || ''; } catch (e) {}
+function sendBox() {
+  return `<div class="send">
+    <label for="nm">あなたの氏名（送るときに入ります）</label>
+    <input id="nm" type="text" placeholder="例：平成 太郎" value="${savedName.replace(/"/g, '')}" oninput="savedName=this.value;try{localStorage.setItem('navi_name',this.value)}catch(e){}">
+    <div class="row"><button class="line" onclick="sendLine()">LINEで事務所に送る</button><button class="copy" onclick="copyText()">文章をコピー</button></div>
+    <div class="hint">LINEが開いたら、送り先に事務所の担当者（またはグループ）を選んでください。マイナンバーなどは入りません。</div>
+  </div>`;
+}
+function resultText() {
+  const name = (document.getElementById('nm')?.value || '').trim();
+  const lines = [`【${NAVI_NAME}の結果】`, `氏名：${name || '（未入力）'}`];
+  const badge = document.querySelector('.badge');
+  if (badge) lines.push('判定：' + badge.innerText.replace(/^[^ぁ-んァ-ヶ一-龠A-Za-z0-9]+/, '').trim());
+  document.querySelectorAll('#card .sec').forEach(sec => {
+    const h = sec.querySelector('.sec-t');
+    if (!h) return;
+    lines.push('', '■' + h.innerText.trim());
+    const docs = sec.querySelectorAll('.doc');
+    if (docs.length) {
+      docs.forEach(d => {
+        const span = d.querySelector('span:not(.ic)');
+        if (!span) { lines.push('・' + d.innerText.replace(/^[✓✔]\s*/, '').trim()); return; }
+        let label = '';
+        span.childNodes.forEach(n => { if (n.nodeType === 3 || (n.tagName === 'B')) label += n.textContent; });
+        lines.push('・' + label.trim());
+      });
+    } else {
+      const ol = sec.querySelector('ol');
+      if (ol) return lines.pop() && lines.pop();
+      sec.querySelector('.answers')?.innerText.split('\n').forEach(a => a.trim() && lines.push(a.trim()));
+    }
+  });
+  return lines.join('\n');
+}
+function sendLine() {
+  const url = 'https://line.me/R/share?text=' + encodeURIComponent(resultText());
+  window.location.href = url;
+}
+async function copyText() {
+  const t = resultText();
+  try { await navigator.clipboard.writeText(t); alert('コピーしました。LINEやメールに貼り付けて送ってください。'); }
+  catch (e) { prompt('この文章をコピーしてください', t); }
 }
 
 render();
