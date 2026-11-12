@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>年末調整ナビ（平成造園）</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #2f6b3a; --brand-dk: #234f2b; --brand-lt: #eaf4ec;
+    --ink: #1f2a22; --sub: #5d6b61; --line: #dfe7e1;
+    --ok: #2e8b4a; --ng: #b8432f; --warn: #d9822b;
+  }
+  body {
+    font-family: "Meiryo", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #eef3ef; color: var(--ink);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 40px;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  header .co { font-size: .78rem; color: var(--brand); font-weight: bold; letter-spacing: .08em; }
+  header h1 { font-size: 1.3rem; color: var(--brand-dk); margin-top: 2px; }
+  header p { font-size: .8rem; color: var(--sub); margin-top: 4px; line-height: 1.6; }
+
+  #card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.08); width: 100%; max-width: 600px; overflow: hidden; transition: opacity .18s ease, transform .18s ease; }
+  #card.fade-out { opacity: 0; transform: translateY(8px); }
+
+  .banner { padding: 10px 20px; font-size: .78rem; font-weight: bold; letter-spacing: .05em; color: #fff; }
+  .banner.p1 { background: var(--brand); }
+  .banner.p2 { background: #3c6e8f; }
+  .banner.p3 { background: #7a5c2e; }
+  .banner.ok { background: var(--ok); }
+  .banner.ng { background: #6f7b73; }
+
+  .progress-wrap { padding: 10px 20px 0; }
+  .progress-label { font-size: .75rem; color: #8a958d; margin-bottom: 5px; }
+  .bar { height: 5px; background: #e5ece7; border-radius: 9999px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, #4f9a5f, #3c6e8f); transition: width .3s ease; }
+
+  .body { padding: 22px 24px 20px; }
+  .q-num { font-size: .75rem; color: var(--brand); font-weight: bold; margin-bottom: 8px; letter-spacing: .06em; }
+  .question { font-size: 1.05rem; font-weight: bold; line-height: 1.65; margin-bottom: 12px; }
+  .note { background: #f2f7f3; border-left: 3px solid var(--brand); border-radius: 4px; padding: 9px 12px; font-size: .81rem; color: #3f4a43; line-height: 1.7; margin-bottom: 18px; }
+  .note.warn { background: #fff8ee; border-left-color: var(--warn); }
+
+  .btns { display: flex; gap: 10px; margin-top: 4px; }
+  .btns.v { flex-direction: column; }
+  .btn { flex: 1; padding: 13px 12px; border-radius: 10px; border: 2px solid transparent; font-size: .95rem; font-weight: bold; cursor: pointer; transition: all .15s ease; text-align: center; line-height: 1.4; font-family: inherit; }
+  .btn:active { transform: scale(.97); }
+  .btn-yes { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .btn-yes:hover { background: var(--brand-dk); }
+  .btn-no { background: #fff; color: var(--ng); border-color: var(--ng); }
+  .btn-no:hover { background: #fdf2f0; }
+  .btn-ch { background: #f6faf7; color: var(--ink); border-color: #d3e0d6; text-align: left; padding: 12px 16px; }
+  .btn-ch:hover { background: var(--brand-lt); border-color: var(--brand); }
+  .btn-ch small, .chk small { display: block; font-size: .77rem; color: #6f7b73; font-weight: normal; margin-top: 3px; }
+
+  .chk { display: flex; gap: 10px; align-items: flex-start; padding: 11px 14px; border: 2px solid #d3e0d6; border-radius: 10px; background: #f6faf7; cursor: pointer; font-weight: bold; font-size: .93rem; line-height: 1.45; }
+  .chk:has(input:checked) { background: var(--brand-lt); border-color: var(--brand); }
+  .chk input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--brand); flex-shrink: 0; }
+  .next { margin-top: 8px; }
+
+  .foot { border-top: 1px solid #eef2ef; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+  .link { background: none; border: none; color: #6f7b73; font-size: .83rem; cursor: pointer; font-family: inherit; }
+  .link:hover { color: var(--brand); }
+  .link:disabled { opacity: .3; cursor: default; }
+  .link.r { margin-left: auto; }
+
+  .badge { display: inline-block; font-size: 1.1rem; font-weight: bold; padding: 9px 20px; border-radius: 30px; margin-bottom: 14px; }
+  .badge.ok { background: #dcf3e3; color: #1e6b37; }
+  .badge.ng { background: #e8ece9; color: #3f4a43; }
+  .r-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 8px; }
+  .r-desc { font-size: .86rem; color: #4d5a51; line-height: 1.75; margin-bottom: 18px; }
+
+  .sec { margin-bottom: 18px; }
+  .sec-t { font-size: .8rem; font-weight: bold; color: var(--brand-dk); margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .doc { display: flex; gap: 8px; padding: 9px 12px; border-radius: 8px; margin-bottom: 6px; font-size: .88rem; line-height: 1.55; }
+  .doc.req { background: #fef9e7; border: 1px solid #efcf7a; color: #5e4300; }
+  .doc.att { background: #fff; border: 1px dashed #d9b75a; color: #5e4300; margin-left: 18px; }
+  .doc.info { background: #eef5fb; border: 1px solid #c4dbef; color: #23465f; }
+  .doc.self { background: #f6eeee; border: 1px solid #e3c2bb; color: #6b2a1f; }
+  .doc .ic { flex-shrink: 0; }
+  .doc small { display: block; font-size: .78rem; opacity: .85; margin-top: 2px; }
+  .tag { display: inline-block; background: #e5dcf0; color: #5b3a83; font-size: .7rem; font-weight: bold; padding: 1px 6px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+
+  .answers { font-size: .78rem; color: #6f7b73; line-height: 1.7; background: #f8faf8; border-radius: 8px; padding: 8px 12px; }
+  .act { display: flex; gap: 10px; margin-top: 10px; }
+  .act button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: .93rem; font-weight: bold; cursor: pointer; font-family: inherit; }
+  .act .main { background: var(--brand); color: #fff; }
+  .act .main:hover { background: var(--brand-dk); }
+  .act .sub { background: #e8eee9; color: var(--ink); }
+
+  .meta { max-width: 600px; width: 100%; font-size: .72rem; color: #8a958d; line-height: 1.7; margin-top: 14px; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    #card { box-shadow: none; max-width: none; }
+    .foot, .act, .noprint { display: none !important; }
+    .doc, .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="co">株式会社平成造園　社内用</div>
+  <h1>年末調整ナビ（令和8年分）</h1>
+  <p>質問に答えると、事務所に出す申告書と、付ける証明書がわかります。<br>最後の画面を印刷して、書類といっしょに出してください。</p>
+</header>
+
+<div id="card"></div>
+
+<div class="meta noprint">
+  令和8年分は税制改正で、家族の年収の基準が上がりました（扶養控除・配偶者控除は<b>年収136万円以下</b>、本人に所得税がかかるのは<b>178万円超</b>）。<b>去年と同じ年収でも、今年は控除の額が変わる</b>ことがあります。
+  基準：TKC事務所通信 令和8年度改正所得税法特集号（2026.8）ほか。目安です。迷ったら事務所へ。
+</div>
+
+<script>
+// ===== 状態 =====
+const INIT = { step: 'q1', f: {}, answers: [] };
+let state = JSON.parse(JSON.stringify(INIT));
+let stack = [];
+let choices = [];
+
+function go(next, o = {}) {
+  stack.push(JSON.stringify(state));
+  const s = { ...state, step: next, f: { ...state.f, ...(o.f || {}) } };
+  s.answers = [...state.answers, ...[].concat(o.ans || [])];
+  state = s;
+  animate();
+}
+function back() { if (!stack.length) return; state = JSON.parse(stack.pop()); render(); }
+function restart() { stack = []; state = JSON.parse(JSON.stringify(INIT)); animate(); }
+function pick(i) { choices[i](); }
+function animate() {
+  const c = document.getElementById('card');
+  c.classList.add('fade-out');
+  setTimeout(() => { c.classList.remove('fade-out'); render(); window.scrollTo(0, 0); }, 160);
+}
+// 複数選択の「次へ」
+function submitMulti() {
+  const d = STEPS[state.step];
+  const picked = [...document.querySelectorAll('input[name=m]:checked')].map(e => e.value);
+  const items = d.items.filter(it => picked.includes(it.key));
+  const f = {};
+  items.forEach(it => f[it.key] = true);
+  const ans = items.length ? d.short + '：' + items.map(it => it.short || it.label).join('・') : d.short + '：なし';
+  go(d.next(f), { f, ans });
+}
+
+// 家族の質問の順番：配偶者 → 扶養家族 → (19〜22歳の子の年収) → その他
+const afterDep = f => (f.kid19 ? 'qKid19' : (f.kid16 || f.oya) ? 'qDepIncome' : 'qSpecial');
+
+// ===== 質問 =====
+const STEPS = {
+  q1: {
+    part: 1, label: '年末調整の対象か', qNum: 'Q1',
+    question: '今年の<b>12月の給与</b>を平成造園で受け取りますか？',
+    note: '年末調整は、年末の時点で在籍している人が対象です。年の途中で辞める人は対象外です。',
+    type: 'yesno',
+    onYes: () => go('q2', { ans: '12月まで在籍' }),
+    onNo:  () => go('outTaishoku', { ans: '年内に退職' }),
+  },
+  q2: {
+    part: 1, label: '年末調整の対象か', qNum: 'Q2',
+    question: 'ほかにも勤め先がありますか？ ある場合、<b>メインの勤め先は平成造園</b>ですか？',
+    note: '「扶養控除等申告書」を出せるのは1か所だけ。年末調整はその会社でします。',
+    type: 'choice',
+    choices: [
+      { label: '勤め先は平成造園だけ', fn: () => go('q3', { ans: '勤め先は平成造園のみ' }) },
+      { label: 'ほかにもあるが、メインは平成造園', sub: 'ほかの勤め先の分は自分で確定申告が必要な場合あり', fn: () => go('q3', { f: { fukugyo: true }, ans: '掛け持ち・メインは平成造園' }) },
+      { label: 'メインはほかの会社（平成造園はサブ）', fn: () => go('outSub', { ans: 'メインは他社' }) },
+    ],
+  },
+  q3: {
+    part: 1, label: '年末調整の対象か', qNum: 'Q3',
+    question: '今年、平成造園に入る前に<b>別の会社から給与</b>をもらいましたか？',
+    note: '今年入社した方が対象です。前の会社の分も合わせて年末調整します。',
+    type: 'yesno',
+    onYes: () => go('qSpouse', { f: { zenshoku: true }, ans: '今年 前職の給与あり' }),
+    onNo:  () => go('qSpouse', { ans: '今年 前職の給与なし' }),
+  },
+
+  // ── 家族 ──
+  qSpouse: {
+    part: 2, label: '家族のこと', qNum: 'Q4　配偶者',
+    question: '配偶者（妻・夫）の<b>今年1〜12月の年収の見込み</b>は？',
+    note: '給与だけの場合の金額です。年金・自営業の収入がある場合は「給与以外の収入がある」を選んでください。<br>※あなたの年収が1,195万円を超える場合、配偶者の控除は受けられません。',
+    noteWarn: true,
+    type: 'choice',
+    choices: [
+      { label: '配偶者はいない', fn: () => go('qDep', { ans: '配偶者なし' }) },
+      { label: '136万円以下', sub: '配偶者控除（最高38万円）', fn: () => go('qDep', { f: { sp: 'kojo' }, ans: '配偶者 年収136万円以下' }) },
+      { label: '136万円超〜207万円以下', sub: '配偶者特別控除（38万〜1万円）', fn: () => go('qDep', { f: { sp: 'tokubetsu' }, ans: '配偶者 年収136万超〜207万以下' }) },
+      { label: '207万円超', sub: '控除なし', fn: () => go('qDep', { f: { sp: 'none' }, ans: '配偶者 年収207万超' }) },
+      { label: '給与以外の収入がある（年金・自営業・農業など）', sub: '所得（収入−経費）で判断。事務所で確認します', fn: () => go('qDep', { f: { sp: 'other' }, ans: '配偶者 給与以外の収入あり' }) },
+    ],
+  },
+  qDep: {
+    part: 2, label: '家族のこと', qNum: 'Q5　扶養している家族',
+    question: '生活費を出している（同居・仕送り）家族を、<b>すべて</b>選んでください。',
+    note: '年齢は今年12月31日時点。配偶者は除きます。',
+    type: 'multi', short: '扶養家族',
+    items: [
+      { key: 'kid15', label: '16歳未満の子', sub: '平成23年1月2日以後生まれ（税金の控除はないが、住民税のために書く）', short: '16歳未満の子' },
+      { key: 'kid16', label: '16〜18歳の子（高校生など）', sub: '平成20年1月2日〜平成23年1月1日生まれ', short: '16〜18歳の子' },
+      { key: 'kid19', label: '19〜22歳の子（大学生など）', sub: '平成16年1月2日〜平成20年1月1日生まれ', short: '19〜22歳の子' },
+      { key: 'oya', label: '親・祖父母・23歳以上の子・兄弟など', sub: '70歳以上（昭和32年1月1日以前生まれ）だと控除が増えます', short: '親など' },
+    ],
+    next: f => afterDep(f),
+  },
+  qKid19: {
+    part: 2, label: '家族のこと', qNum: 'Q5 補足　19〜22歳の子',
+    question: '19〜22歳の子の<b>今年の年収の見込み</b>は？（アルバイト代など）',
+    note: '2人以上いる場合は、1人ずつ考えて当てはまるものを選んでください（あとで事務所で確認します）。',
+    type: 'choice',
+    choices: [
+      { label: '136万円以下', sub: '扶養控除（特定扶養親族）63万円', fn: () => go(STEPS.qKid19.after(), { f: { k19: 'fuyo' }, ans: '19〜22歳の子 年収136万以下' }) },
+      { label: '136万円超〜197万円以下', sub: '特定親族特別控除（63万〜3万円）＝今年からの新しい控除', fn: () => go(STEPS.qKid19.after(), { f: { k19: 'tokutei' }, ans: '19〜22歳の子 年収136万超〜197万以下' }) },
+      { label: '197万円超', sub: '控除なし', fn: () => go(STEPS.qKid19.after(), { f: { k19: 'none' }, ans: '19〜22歳の子 年収197万超' }) },
+      { label: '人によって違う／わからない', sub: '事務所で確認します', fn: () => go(STEPS.qKid19.after(), { f: { k19: 'mixed' }, ans: '19〜22歳の子 年収は人により違う' }) },
+    ],
+    after: () => (state.f.kid16 || state.f.oya) ? 'qDepIncome' : 'qSpecial',
+  },
+  qDepIncome: {
+    part: 2, label: '家族のこと', qNum: 'Q5 補足　その他の扶養家族',
+    question: '16〜18歳の子・親などの<b>今年の年収</b>は、次の範囲におさまっていますか？',
+    note: '・給与だけなら <b>136万円以下</b><br>・年金だけなら 65歳以上は <b>172万円以下</b>、65歳未満は <b>122万円以下</b>（目安）<br>超えている家族は、税金の扶養には入れません（健康保険の扶養とは別です）。',
+    type: 'yesno',
+    onYes: () => go('qSpecial', { f: { depOk: true }, ans: '扶養家族の年収は範囲内' }),
+    onNo:  () => go('qSpecial', { f: { depOver: true }, ans: '範囲を超える家族がいる' }),
+  },
+  qSpecial: {
+    part: 2, label: '家族のこと', qNum: 'Q6　その他の控除',
+    question: 'あてはまるものを<b>すべて</b>選んでください。',
+    note: 'どれも、扶養控除等申告書に書くだけで受けられます（証明書は不要。学生は一部必要）。',
+    type: 'multi', short: 'その他',
+    items: [
+      { key: 'shogai', label: 'あなたか家族に障害者手帳などがある', short: '障害者' },
+      { key: 'hitorioya', label: 'ひとり親（結婚していない・離婚・死別で、子を扶養している）', short: 'ひとり親' },
+      { key: 'kafu', label: '寡婦（夫と離婚・死別後、再婚していない女性。ひとり親以外）', short: '寡婦' },
+      { key: 'gakusei', label: 'あなた自身が学生で、年収が163万円以下', sub: '勤労学生控除（所得89万円以下）', short: '勤労学生' },
+    ],
+    next: () => 'qHoken',
+  },
+
+  // ── 保険・ローン ──
+  qHoken: {
+    part: 3, label: '保険料・ローン', qNum: 'Q7　保険料・掛金',
+    question: '今年、<b>あなたが払った</b>ものを<b>すべて</b>選んでください。',
+    note: '給料から天引きされている社会保険料・会社の保険は対象外（会社で計算します）。',
+    type: 'multi', short: '保険料',
+    items: [
+      { key: 'seimei', label: '生命保険・医療保険・がん保険・個人年金保険', sub: '控除証明書（10〜11月ごろハガキで届く）', short: '生命保険' },
+      { key: 'jishin', label: '地震保険（火災保険の地震保険部分）', sub: '控除証明書', short: '地震保険' },
+      { key: 'kokunen', label: '国民年金・国民健康保険（家族の分を含む）', sub: '国民年金は控除証明書／国保は領収書など', short: '国民年金・国保' },
+      { key: 'ideco', label: 'iDeCo・小規模企業共済（自分で口座引落し）', sub: '払込証明書', short: 'iDeCo等' },
+    ],
+    next: () => 'qLoan',
+  },
+  qLoan: {
+    part: 3, label: '保険料・ローン', qNum: 'Q8　住宅ローン',
+    question: '住宅ローン控除を受けていますか？',
+    type: 'choice',
+    choices: [
+      { label: '住宅ローンはない／控除は受けていない', fn: () => go('qKakutei', { ans: '住宅ローン控除なし' }) },
+      { label: '2年目以降（去年までに確定申告をした）', sub: '年末調整で受けられます', fn: () => go('qKakutei', { f: { loan: 2 }, ans: '住宅ローン控除 2年目以降' }) },
+      { label: '今年住み始めた（1年目）', sub: '1年目は自分で確定申告', fn: () => go('qKakutei', { f: { loan: 1 }, ans: '住宅ローン控除 1年目' }) },
+    ],
+  },
+  qKakutei: {
+    part: 3, label: '保険料・ローン', qNum: 'Q9　年末調整ではできないもの',
+    question: 'あてはまるものがあれば<b>すべて</b>選んでください。',
+    note: 'これらは年末調整ではできません。自分で確定申告（翌年2月16日〜3月15日）をします。',
+    noteWarn: true,
+    type: 'multi', short: '確定申告の候補',
+    items: [
+      { key: 'iryo', label: '医療費が年間10万円を超えた（家族分を合わせて）', short: '医療費' },
+      { key: 'furusato', label: 'ふるさと納税をした', sub: 'ワンストップ特例（5自治体以内・申請済み）なら申告不要', short: 'ふるさと納税' },
+      { key: 'nenkin', label: '年金も受け取っている', short: '年金受給' },
+      { key: 'fuku', label: '副業・農業・家賃などの所得が年20万円を超える', short: '副業等' },
+    ],
+    next: () => 'result',
+  },
+};
+
+const ORDER = ['q1', 'q2', 'q3', 'qSpouse', 'qDep', 'qKid19', 'qDepIncome', 'qSpecial', 'qHoken', 'qLoan', 'qKakutei'];
+function pct() { const i = ORDER.indexOf(state.step); return i < 0 ? 100 : Math.round(((i + 1) / (ORDER.length + 1)) * 100); }
+
+// ===== 描画 =====
+const val = v => typeof v === 'function' ? v() : v;
+const PART = { 1: ['p1', '第1部'], 2: ['p2', '第2部'], 3: ['p3', '第3部'] };
+
+function render() {
+  const card = document.getElementById('card');
+  const s = state.step;
+  if (s === 'result') return renderResult(card);
+  if (s === 'outTaishoku' || s === 'outSub') return renderOut(card);
+  const d = STEPS[s];
+  choices = [];
+  let btns = '';
+  if (d.type === 'yesno') {
+    choices = [d.onYes, d.onNo];
+    btns = `<div class="btns"><button class="btn btn-yes" onclick="pick(0)">はい</button><button class="btn btn-no" onclick="pick(1)">いいえ</button></div>`;
+  } else if (d.type === 'choice') {
+    choices = d.choices.map(c => c.fn);
+    btns = `<div class="btns v">` + d.choices.map((c, i) =>
+      `<button class="btn btn-ch" onclick="pick(${i})">${c.label}${c.sub ? `<small>${c.sub}</small>` : ''}</button>`).join('') + `</div>`;
+  } else {
+    btns = `<div class="btns v">` + d.items.map(it =>
+      `<label class="chk"><input type="checkbox" name="m" value="${it.key}"><span>${it.label}${it.sub ? `<small>${it.sub}</small>` : ''}</span></label>`).join('') +
+      `<button class="btn btn-yes next" onclick="submitMulti()">次へ（なければそのまま）</button></div>`;
+  }
+  const note = val(d.note);
+  card.innerHTML = `
+    <div class="banner ${PART[d.part][0]}">${PART[d.part][1]}　${d.label}</div>
+    <div class="progress-wrap"><div class="progress-label">${d.qNum}</div><div class="bar"><div style="width:${pct()}%"></div></div></div>
+    <div class="body">
+      <div class="q-num">${d.qNum}</div>
+      <div class="question">${val(d.question)}</div>
+      ${note ? `<div class="note${d.noteWarn ? ' warn' : ''}">${note}</div>` : ''}
+      ${btns}
+    </div>
+    <div class="foot"><button class="link" onclick="back()" ${stack.length ? '' : 'disabled'}>← 前の質問に戻る</button>
+      <button class="link r" onclick="restart()">最初から</button></div>`;
+}
+
+const answersHtml = () => `<div class="sec"><div class="sec-t">あなたの回答</div><div class="answers">${state.answers.map(a => '・' + a).join('<br>')}</div></div>`;
+const actions = () => `<div class="act"><button class="main" onclick="window.print()">🖨 印刷する</button><button class="sub" onclick="restart()">↺ 最初から</button></div>`;
+const foot = () => `<div class="foot"><button class="link" onclick="back()">← 前の質問に戻る</button></div>`;
+const req = (label, note, tag) => `<div class="doc req"><span class="ic">📄</span><span>${label}${tag ? `<span class="tag">${tag}</span>` : ''}${note ? `<small>${note}</small>` : ''}</span></div>`;
+const att = (label, note) => `<div class="doc att"><span class="ic">📎</span><span>${label}${note ? `<small>${note}</small>` : ''}</span></div>`;
+const info = (label, note) => `<div class="doc info"><span class="ic">ℹ️</span><span>${label}${note ? `<small>${note}</small>` : ''}</span></div>`;
+const self = (label, note) => `<div class="doc self"><span class="ic">🧾</span><span>${label}${note ? `<small>${note}</small>` : ''}</span></div>`;
+
+function renderOut(card) {
+  const taishoku = state.step === 'outTaishoku';
+  card.innerHTML = `
+    <div class="banner ng">結果</div>
+    <div class="body">
+      <div class="badge ng">平成造園での年末調整はありません</div>
+      <div class="r-desc">${taishoku
+        ? '年内に退職する方は、平成造園では年末調整をしません。事務所から<b>源泉徴収票</b>をお渡しします。<br>・年内に次の会社に入る → 源泉徴収票を次の会社に出して、そこで年末調整<br>・年内に次の勤め先がない → 自分で確定申告（税金が戻ることが多いです）'
+        : 'メインの勤め先で年末調整をします。平成造園の分は<b>源泉徴収票</b>をお渡しするので、自分で確定申告をしてください。'}</div>
+      ${answersHtml()}${actions()}
+    </div>${foot()}`;
+}
+
+function renderResult(card) {
+  const f = state.f;
+  const under23 = f.kid15 || f.kid16 || f.kid19;
+  const spouseIn = ['kojo', 'tokubetsu', 'other'].includes(f.sp);
+  const tokutei = ['tokutei', 'mixed'].includes(f.k19);
+
+  // A. 全員
+  let a = req('令和8年分 年末調整チェックリスト', '事務所が配る用紙。チェックして一緒に出してください');
+  const fuyoNote = [
+    '住所（いまの住所。住民票と違う・年内に引っ越す予定なら事務所へ）',
+    f.sp === 'kojo' || f.sp === 'other' ? '配偶者（源泉控除対象配偶者の欄）' : null,
+    f.sp === 'tokubetsu' ? '配偶者の年収が169万円以下なら、源泉控除対象配偶者の欄にも' : null,
+    (f.kid16 || (f.kid19 && f.k19 !== 'none' && f.k19 !== 'tokutei') || (f.oya && !f.depOver)) ? '扶養している家族（控除対象扶養親族の欄）' : null,
+    f.kid15 ? '16歳未満の子（「住民税に関する事項」の欄）' : null,
+    (f.shogai || f.hitorioya || f.kafu || f.gakusei) ? '障害者・ひとり親・寡婦・勤労学生の欄' : null,
+  ].filter(Boolean).join('／');
+  a += req('令和8年分 扶養控除等（異動）申告書', '書くこと：' + fuyoNote);
+  a += req('令和9年分 扶養控除等（異動）申告書', '来年分。今年と変わりがなければ、事務所の指示どおり（青枠のみ・「なし」にチェック）でOK');
+  const kisoNote = ['「基礎控除申告書」の欄（全員）'];
+  if (spouseIn) kisoNote.push('「配偶者控除等申告書」の欄＝配偶者の今年の年収の見込み');
+  if (tokutei) kisoNote.push('「特定親族特別控除申告書」の欄＝19〜22歳の子の年収の見込み');
+  a += req('令和8年分 基礎控除申告書 兼 配偶者控除等申告書 兼 特定親族特別控除申告書 兼 所得金額調整控除申告書', '書くこと：' + kisoNote.join('／'), tokutei ? '今年から' : '');
+  if (f.gakusei) a += att('学生であることの証明', '専修学校・各種学校などの場合は学校の証明書。大学・高校なら不要');
+
+  // B. 保険
+  let b = '';
+  if (f.seimei || f.jishin || f.kokunen || f.ideco) {
+    b += req('令和8年分 給与所得者の保険料控除申告書');
+    if (f.seimei) b += att('生命保険料控除証明書（保険会社から届くハガキ）', under23 ? '23歳未満の子を扶養しているので、今年は新しい生命保険の控除の上限が6万円に上がります（令和8・9年分の特例）' : '');
+    if (f.jishin) b += att('地震保険料控除証明書');
+    if (f.kokunen) b += att('国民年金の「社会保険料（国民年金保険料）控除証明書」／国民健康保険の領収書・納付証明', '家族の分を払った場合も、あなたが払ったなら対象');
+    if (f.ideco) b += att('小規模企業共済等掛金払込証明書');
+  }
+
+  // C. ローン・前職
+  let c = '';
+  if (f.zenshoku) c += req('前の会社の源泉徴収票（原本）', '今年もらった給与の分。なければ前の会社に請求してください');
+  if (f.loan === 2) { c += req('令和8年分 住宅借入金等特別控除申告書', '税務署から届いた用紙（毎年分まとめて届いています）'); c += att('住宅ローンの年末残高証明書', '銀行から届きます'); }
+
+  // D. 注意・確定申告
+  let d = '';
+  if (f.sp === 'other') d += info('配偶者に給与以外の収入がある', '年金・自営業などは「所得（収入−経費）」で判断します（所得62万円以下＝配偶者控除、133万円以下＝配偶者特別控除）。金額のわかるもの（年金の通知・確定申告書の控えなど）を事務所に見せてください');
+  if (f.depOver) d += info('年収が基準を超える家族は、税金の扶養には書きません', '健康保険の扶養とは別の判断です（健康保険は「扶養判定ナビ」へ）');
+  if (f.k19 === 'mixed') d += info('19〜22歳の子が2人以上で年収が違う', '1人ずつ、扶養控除（136万円以下）か特定親族特別控除（136万超〜197万以下）かを事務所で確認します');
+  if (f.sp === 'tokubetsu' || tokutei) d += info('去年と同じ年収でも、今年は控除の額が変わることがあります', '令和8年分の改正で基準が上がったため。見込みの年収はなるべく正確に書いてください');
+  if (f.fukugyo) d += info('ほかの勤め先の給与は、平成造園の年末調整に入りません', 'ほかの勤め先の分は確定申告が必要な場合があります');
+
+  let e = '';
+  if (f.loan === 1) e += self('住宅ローン控除（1年目）', '1年目だけは自分で確定申告。2年目からは年末調整でできます');
+  if (f.iryo) e += self('医療費控除', '領収書をもとに「医療費控除の明細書」を作って確定申告');
+  if (f.furusato) e += self('ふるさと納税', 'ワンストップ特例を申請していない、または6自治体以上なら確定申告');
+  if (f.nenkin) e += self('年金の分', '公的年金が年400万円以下で、ほかの所得が20万円以下なら申告不要。医療費控除などで戻る場合は申告した方がよい');
+  if (f.fuku) e += self('副業・農業・家賃などの所得', '所得が20万円を超えると確定申告が必要');
+
+  card.innerHTML = `
+    <div class="banner ok">結果</div>
+    <div class="body">
+      <div class="badge ok">✅ 年末調整の対象です</div>
+      <div class="r-title">次の書類を事務所へ</div>
+      <div class="r-desc">提出の期日は、事務所から配る「年末調整のお知らせ・チェックリスト」に書いてあります（例年11月下旬）。<b>証明書は原本</b>を付けてください。結果は来年1月の給与で精算します。</div>
+      <div class="sec"><div class="sec-t">A. 全員が出すもの</div>${a}</div>
+      ${b ? `<div class="sec"><div class="sec-t">B. 保険料の控除</div>${b}</div>` : ''}
+      ${c ? `<div class="sec"><div class="sec-t">C. 前の会社・住宅ローン</div>${c}</div>` : ''}
+      ${d ? `<div class="sec"><div class="sec-t">気をつけること</div>${d}</div>` : ''}
+      ${e ? `<div class="sec"><div class="sec-t">年末調整ではできない → 自分で確定申告（翌年2/16〜3/15）</div>${e}</div>` : ''}
+      ${answersHtml()}
+      ${actions()}
+    </div>${foot()}`;
+}
+
+render();
+</script>
+</body>
+</html>

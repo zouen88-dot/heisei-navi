@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>扶養判定ナビ（平成造園）</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #2f6b3a; --brand-dk: #234f2b; --brand-lt: #eaf4ec;
+    --ink: #1f2a22; --sub: #5d6b61; --line: #dfe7e1;
+    --ok: #2e8b4a; --ng: #b8432f; --warn: #d9822b;
+  }
+  body {
+    font-family: "Meiryo", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #eef3ef; color: var(--ink);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 40px;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  header .co { font-size: .78rem; color: var(--brand); font-weight: bold; letter-spacing: .08em; }
+  header h1 { font-size: 1.3rem; color: var(--brand-dk); margin-top: 2px; }
+  header p { font-size: .8rem; color: var(--sub); margin-top: 4px; line-height: 1.6; }
+
+  #card {
+    background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.08);
+    width: 100%; max-width: 600px; overflow: hidden;
+    transition: opacity .18s ease, transform .18s ease;
+  }
+  #card.fade-out { opacity: 0; transform: translateY(8px); }
+
+  .banner { padding: 10px 20px; font-size: .78rem; font-weight: bold; letter-spacing: .05em; color: #fff; }
+  .banner.p1 { background: var(--brand); }
+  .banner.p2 { background: #3c6e8f; }
+  .banner.ok { background: var(--ok); }
+  .banner.ng { background: var(--ng); }
+  .banner.rm { background: #7a5c2e; }
+
+  .progress-wrap { padding: 10px 20px 0; }
+  .progress-label { font-size: .75rem; color: #8a958d; margin-bottom: 5px; }
+  .bar { height: 5px; background: #e5ece7; border-radius: 9999px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, #4f9a5f, #3c6e8f); transition: width .3s ease; }
+
+  .body { padding: 22px 24px 20px; }
+  .q-num { font-size: .75rem; color: var(--brand); font-weight: bold; margin-bottom: 8px; letter-spacing: .06em; }
+  .question { font-size: 1.05rem; font-weight: bold; line-height: 1.65; margin-bottom: 12px; }
+  .note {
+    background: #f2f7f3; border-left: 3px solid var(--brand); border-radius: 4px;
+    padding: 9px 12px; font-size: .81rem; color: #3f4a43; line-height: 1.7; margin-bottom: 18px;
+  }
+  .note.warn { background: #fff8ee; border-left-color: var(--warn); }
+  .note.co { background: #f4f1ea; border-left-color: #8a6d3b; }
+  .note.co::before { content: "弊社ルール　"; font-weight: bold; color: #8a6d3b; }
+
+  .btns { display: flex; gap: 10px; margin-top: 4px; }
+  .btns.v { flex-direction: column; }
+  .btn {
+    flex: 1; padding: 13px 12px; border-radius: 10px; border: 2px solid transparent;
+    font-size: .95rem; font-weight: bold; cursor: pointer; transition: all .15s ease;
+    text-align: center; line-height: 1.4; font-family: inherit;
+  }
+  .btn:active { transform: scale(.97); }
+  .btn-yes { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .btn-yes:hover { background: var(--brand-dk); }
+  .btn-no { background: #fff; color: var(--ng); border-color: var(--ng); }
+  .btn-no:hover { background: #fdf2f0; }
+  .btn-ch { background: #f6faf7; color: var(--ink); border-color: #d3e0d6; text-align: left; padding: 12px 16px; }
+  .btn-ch:hover { background: var(--brand-lt); border-color: var(--brand); }
+  .btn-ch small { display: block; font-size: .77rem; color: #6f7b73; font-weight: normal; margin-top: 3px; }
+
+  .foot { border-top: 1px solid #eef2ef; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+  .link { background: none; border: none; color: #6f7b73; font-size: .83rem; cursor: pointer; font-family: inherit; }
+  .link:hover { color: var(--brand); }
+  .link:disabled { opacity: .3; cursor: default; }
+  .link.r { margin-left: auto; }
+
+  .badge { display: inline-block; font-size: 1.15rem; font-weight: bold; padding: 9px 20px; border-radius: 30px; margin-bottom: 14px; }
+  .badge.ok { background: #dcf3e3; color: #1e6b37; }
+  .badge.ng { background: #f9ddd8; color: #8f2b1d; }
+  .badge.rm { background: #f3e9d6; color: #6b4a16; }
+  .r-title { font-size: 1.08rem; font-weight: bold; margin-bottom: 8px; }
+  .r-desc { font-size: .86rem; color: #4d5a51; line-height: 1.75; margin-bottom: 18px; }
+
+  .sec { margin-bottom: 18px; }
+  .sec-t {
+    font-size: .8rem; font-weight: bold; color: var(--brand-dk); margin-bottom: 8px;
+    padding-bottom: 4px; border-bottom: 1px solid var(--line);
+  }
+  .doc { display: flex; gap: 8px; padding: 9px 12px; border-radius: 8px; margin-bottom: 6px; font-size: .88rem; line-height: 1.55; }
+  .doc.req { background: #fef9e7; border: 1px solid #efcf7a; color: #5e4300; }
+  .doc.skip { background: #f2f2f2; color: #8d8d8d; font-size: .83rem; }
+  .doc.info { background: #eef5fb; border: 1px solid #c4dbef; color: #23465f; }
+  .doc .ic { flex-shrink: 0; }
+  .doc small { display: block; font-size: .78rem; color: #7d6a3c; margin-top: 2px; }
+  .doc.info small { color: #4d6d86; }
+  .tag { display: inline-block; background: #e5dcf0; color: #5b3a83; font-size: .7rem; font-weight: bold; padding: 1px 6px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+
+  ol.flow { margin: 0 0 0 1.3em; font-size: .86rem; line-height: 1.8; }
+  ol.flow li { margin-bottom: 4px; }
+
+  .answers { font-size: .78rem; color: #6f7b73; line-height: 1.7; background: #f8faf8; border-radius: 8px; padding: 8px 12px; }
+  .act { display: flex; gap: 10px; margin-top: 10px; }
+  .act button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: .93rem; font-weight: bold; cursor: pointer; font-family: inherit; }
+  .act .main { background: var(--brand); color: #fff; }
+  .act .main:hover { background: var(--brand-dk); }
+  .act .sub { background: #e8eee9; color: var(--ink); }
+
+  .meta { max-width: 600px; width: 100%; font-size: .72rem; color: #8a958d; line-height: 1.7; margin-top: 14px; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    #card { box-shadow: none; max-width: none; }
+    .foot, .act, .noprint { display: none !important; }
+    .doc, .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="co">株式会社平成造園　社内用</div>
+  <h1>扶養判定ナビ（健康保険・年金）</h1>
+  <p>質問に答えると、家族を扶養に入れられるか・事務所に出す書類がわかります。<br>最後の画面を印刷するか、スマホで事務所に見せてください。</p>
+</header>
+
+<div id="card"></div>
+
+<div class="meta noprint">
+  基準：2026年11月時点の協会けんぽ・日本年金機構の取扱い（19〜22歳150万円＝2025年10月〜、給与収入の契約ベース判定＝2026年4月〜）。
+  これは目安です。最終的な認定は年金事務所・協会けんぽが行います。迷ったら事務所へ。
+</div>
+
+<script>
+// ===== 状態 =====
+const INIT = { step: 'start', docs: [], skips: [], cohabit: null, rel: null, age: null, answers: [], reason: '' };
+let state = JSON.parse(JSON.stringify(INIT));
+let stack = [];
+let choices = [];   // 現在の画面のボタン動作
+
+const REL = {
+  spouse: '配偶者（入籍）', naien: '配偶者（内縁・事実婚）', child: '子・孫',
+  parent: '父母・祖父母', sibling: '兄弟姉妹', other: 'その他3親等内の親族（同居）'
+};
+const AGE = { u16: '16歳未満', a16: '16〜18歳', a19: '19〜22歳', a23: '23〜59歳', a60: '60〜74歳', a75: '75歳以上' };
+const isSpouse = () => state.rel === 'spouse' || state.rel === 'naien';
+
+function limitMan() {
+  if (state.age === 'a60') return 180;
+  if (state.age === 'a19' && !isSpouse()) return 150;
+  return 130;
+}
+
+// ===== 画面遷移 =====
+function go(next, o = {}) {
+  stack.push(JSON.stringify(state));
+  const s = { ...state, step: next };
+  const arr = v => v === undefined ? [] : (Array.isArray(v) ? v : [v]);
+  s.docs    = [...state.docs, ...arr(o.doc)];
+  s.skips   = [...state.skips, ...arr(o.skip)];
+  s.answers = [...state.answers, ...arr(o.ans)];
+  for (const k of ['cohabit', 'rel', 'age', 'reason']) if (o[k] !== undefined) s[k] = o[k];
+  state = s;
+  animate();
+}
+function out(reason, ans) { go('out', { reason, ans }); }
+function back() { if (!stack.length) return; state = JSON.parse(stack.pop()); render(); }
+function restart() { stack = []; state = JSON.parse(JSON.stringify(INIT)); animate(); }
+function pick(i) { choices[i](); }
+function animate() {
+  const c = document.getElementById('card');
+  c.classList.add('fade-out');
+  setTimeout(() => { c.classList.remove('fade-out'); render(); window.scrollTo(0, 0); }, 160);
+}
+
+// 収入書類のあと → 仕送り書類の判定へ
+// 同居 or 16歳未満なら仕送り書類は不要 → そのまま結果へ
+function afterIncome(o) {
+  const direct = state.cohabit || state.age === 'u16';
+  const skip = [].concat(o.skip || [], direct ? ['okuri'] : []);
+  go(direct ? 'result' : 'q9', { ...o, skip });
+}
+// 続柄確認のあと：16歳未満は収入書類も不要
+function afterZokugara(o) {
+  if (state.age !== 'u16') return go('q6', o);
+  afterIncome({ ...o, skip: [].concat(o.skip || [], ['income']), ans: [o.ans, '16歳未満のため収入書類なし'] });
+}
+
+// ===== 質問 =====
+const STEPS = {
+  start: {
+    part: 1, label: 'はじめに', qNum: 'START',
+    question: 'どちらの手続きですか？',
+    type: 'choice',
+    choices: [
+      { label: '家族を扶養に入れたい', sub: '結婚・出産・家族の退職・同居 など', fn: () => go('q1', { ans: '扶養に入れたい' }) },
+      { label: '家族を扶養から外したい', sub: '家族の就職・収入増・別居・離婚・75歳到達 など', fn: () => go('remove', { ans: '扶養から外したい' }) },
+    ],
+  },
+
+  // ── 第1部 入れるか ──
+  q1: {
+    part: 1, label: '扶養に入れるか', qNum: 'Q1',
+    question: 'その家族は、日本国内に住民票がありますか？',
+    type: 'yesno',
+    onYes: () => go('qAge', { ans: '国内に住民票あり' }),
+    onNo:  () => go('qOverseas', { ans: '国内に住民票なし' }),
+  },
+  qOverseas: {
+    part: 1, label: '扶養に入れるか', qNum: 'Q1 補足',
+    question: '海外にいる理由は、留学・あなたの海外赴任への同行などですか？',
+    note: '留学生・海外赴任に同行する家族などは「海外特例」で扶養に入れる場合があります。該当しそうなら事務所に相談してください。',
+    type: 'yesno',
+    onYes: () => go('qAge', { ans: '海外特例に該当' }),
+    onNo:  () => out('健康保険の扶養は、原則として日本国内に住んでいる家族が対象です。', '海外特例に該当しない'),
+  },
+  qAge: {
+    part: 1, label: '扶養に入れるか', qNum: 'Q2',
+    question: 'その家族の年齢は？',
+    note: '19〜22歳かどうかは「扶養に入る年の12月31日時点」の年齢で見ます。',
+    type: 'choice',
+    choices: Object.entries(AGE).map(([k, v]) => ({
+      label: v,
+      sub: k === 'a75' ? '後期高齢者医療制度に入るため対象外' : null,
+      fn: () => k === 'a75'
+        ? out('75歳以上の方は後期高齢者医療制度に加入するため、健康保険の扶養には入れません。', '年齢 ' + v)
+        : go('qRel', { age: k, ans: '年齢 ' + v }),
+    })),
+  },
+  qRel: {
+    part: 1, label: '扶養に入れるか', qNum: 'Q3',
+    question: 'あなた（社員）から見て、その家族は？',
+    type: 'choice',
+    choices: [
+      { label: REL.spouse, sub: '同居・別居どちらでも可', fn: () => go('qIncome', { rel: 'spouse', ans: '続柄 ' + REL.spouse }) },
+      { label: REL.naien,  sub: '同居・別居どちらでも可（書類が増えます）', fn: () => go('qIncome', { rel: 'naien', ans: '続柄 ' + REL.naien }) },
+      { label: REL.child,  sub: '同居・別居どちらでも可', fn: () => go('qChild', { rel: 'child', ans: '続柄 ' + REL.child }) },
+      { label: REL.parent, sub: '同居・別居どちらでも可', fn: () => go('qIncome', { rel: 'parent', ans: '続柄 ' + REL.parent }) },
+      { label: REL.sibling, sub: '同居・別居どちらでも可', fn: () => go('qIncome', { rel: 'sibling', ans: '続柄 ' + REL.sibling }) },
+      { label: 'その他3親等内の親族（配偶者の父母・おじおば・甥姪 など）', sub: '同居している', fn: () => go('qIncome', { rel: 'other', ans: '続柄 その他3親等内（同居）' }) },
+      { label: 'その他3親等内の親族（配偶者の父母・おじおば・甥姪 など）', sub: '別居している → 対象外', fn: () => out('配偶者の父母やおじおば・甥姪などは、同居していないと扶養に入れません。', '続柄 その他3親等内（別居）') },
+    ],
+  },
+  qChild: {
+    part: 1, label: '扶養に入れるか', qNum: 'Q3 補足',
+    question: 'あなたの配偶者も会社などで働いていますか？',
+    note: '共働きで子どもを扶養に入れるときは、原則<b>収入の多い方</b>の健康保険に入れます。配偶者の年収がわかる書類（源泉徴収票など）も必要です。',
+    noteCo: true,
+    type: 'choice',
+    choices: [
+      { label: '配偶者は働いていない／収入は少ない（扶養の範囲内）', fn: () => go('qIncome', { ans: '配偶者は扶養の範囲内' }) },
+      { label: '共働きで、<b>自分の方が</b>年収が多い', fn: () => go('qIncome', { ans: '共働き・自分の方が多い', doc: { cat: 'income', label: '配偶者の年収がわかる書類', note: '源泉徴収票・課税証明書など（共働きで子を入れるため）' } }) },
+      { label: '共働きで、<b>配偶者の方が</b>年収が多い', fn: () => out('共働きの場合、子どもは原則として収入の多い方（配偶者）の健康保険に入ります。配偶者の勤務先で手続きしてください。', '共働き・配偶者の方が多い') },
+    ],
+  },
+  qIncome: {
+    part: 1, label: '扶養に入れるか', qNum: 'Q4',
+    question: () => `その家族の「これから1年間の見込み収入」は <span style="color:var(--brand)">${limitMan()}万円未満</span> ですか？`,
+    note: () => {
+      const m = limitMan();
+      const mon = { 130: '108,334', 150: '125,000', 180: '150,000' }[m];
+      return `<b>基準 ${m}万円未満</b>（月額 ${mon}円未満が目安）<br>` +
+        '・原則130万円／60歳以上・障害年金を受けられる程度の障害がある方は180万円／19〜22歳（配偶者を除く）は150万円<br>' +
+        '・給与だけでなく、<b>年金・失業給付・傷病手当金・出産手当金なども含めます</b>（税金がかからない収入も含む）<br>' +
+        '・パート等で<b>給与収入だけ</b>なら、契約上の時給×時間などで見込みます（残業代など臨時の分は原則入れない＝2026年4月〜）';
+    },
+    type: 'yesno',
+    skipIf: () => state.age === 'u16',
+    onYes: () => go('qBalance', { ans: `見込み収入 ${limitMan()}万円未満` }),
+    onNo:  () => out(`見込み収入が${limitMan()}万円以上のため扶養に入れません。勤務先の健康保険か国民健康保険に入ることになります。`, `見込み収入 ${limitMan()}万円以上`),
+  },
+  qBalance: {
+    part: 1, label: '扶養に入れるか', qNum: 'Q5',
+    question: '一緒に住んでいますか？ 当てはまる方を選んでください。',
+    type: 'choice',
+    choices: [
+      { label: '【同居】家族の収入は、あなたの収入の<b>半分未満</b>', sub: '半分以上でも、あなたが主に生活を支えていれば認められる場合あり', fn: () => go('q5', { cohabit: true, ans: '同居・収入は半分未満' }) },
+      { label: '【別居】家族の収入は、あなたからの<b>仕送り額未満</b>', sub: '定期的に仕送りしている', fn: () => go('q5', { cohabit: false, ans: '別居・仕送り額未満' }) },
+      { label: 'どちらにも当てはまらない', fn: () => out('あなたが主にその家族の生活を支えている（生計維持）とは言えないため、扶養に入れません。', '生計維持の条件を満たさない') },
+    ],
+  },
+
+  // ── 第2部 書類 ──
+  q5: {
+    part: 2, label: '事務所に出す書類', qNum: 'Q6　続柄の確認',
+    question: 'あなたと家族の<b>マイナンバー</b>を事務所に伝えられますか？',
+    note: 'マイナンバーを届書に書き、会社が続柄を確認できれば、戸籍や住民票は付けなくてよくなります。番号がわからなければ、役所で「マイナンバー入りの住民票」を取ってください。',
+    noteCo: true,
+    type: 'yesno',
+    onYes: () => afterZokugara({ skip: 'zokugara', ans: 'マイナンバーで続柄確認' }),
+    onNo:  () => afterZokugara({ ans: 'マイナンバーなし', doc: { cat: 'zokugara', label: '戸籍謄（抄）本 または 住民票の写し（続柄がわかるもの）', note: 'あわせてマイナンバー入りの住民票があれば番号も届けられます' } }),
+  },
+  q6: {
+    part: 2, label: '事務所に出す書類', qNum: 'Q7　収入の証明①',
+    question: 'その家族は、年末調整であなたの<b>税金の扶養（控除対象配偶者・扶養親族）</b>に入っていますか？（入れる予定ですか？）',
+    note: '税金の扶養に入っていることを会社が確認できれば、収入の証明書類は原則いりません。<br>あなたの年間の合計所得が<b>1,000万円を超える</b>場合と、配偶者が「配偶者特別控除」の対象（税の扶養ではない）の場合は「いいえ」を選んでください。',
+    noteWarn: true,
+    type: 'yesno',
+    onYes: () => go('q7', { ans: '税の扶養に入っている' }),
+    onNo:  () => go('q8', { ans: '税の扶養に入っていない' }),
+  },
+  q7: {
+    part: 2, label: '事務所に出す書類', qNum: 'Q7　収入の証明②',
+    question: '障害年金・遺族年金・失業給付・傷病手当金・出産手当金など、<b>税金がかからない収入</b>がありますか？',
+    note: '税金の計算では収入にならなくても、健康保険の扶養では収入に入れるので、証明が必要です。',
+    noteWarn: true,
+    type: 'yesno',
+    onYes: () => afterIncome({ ans: '非課税収入あり', doc: { cat: 'income', label: '非課税収入の金額がわかる書類のコピー', note: '年金決定（改定）通知書・雇用保険受給資格者証・傷病手当金の支給決定通知 など' } }),
+    onNo:  () => afterIncome({ skip: 'income', ans: '非課税収入なし' }),
+  },
+  q8: {
+    part: 2, label: '事務所に出す書類', qNum: 'Q7　収入の証明③',
+    question: 'その家族の今の収入は？',
+    type: 'choice',
+    choices: [
+      { label: '退職した（いまは収入なし）', fn: () => afterIncome({ ans: '退職して無収入', doc: { cat: 'income', label: '退職証明書 または 離職票のコピー', note: '退職日がわかるもの' } }) },
+      { label: '失業給付（雇用保険）をもらっている・もらう予定', fn: () => afterIncome({ ans: '失業給付', doc: { cat: 'income', label: '雇用保険受給資格者証のコピー（両面）', note: '日額×360日で年収を見ます。日額3,612円以上（60歳以上は5,000円以上）だと受給中は入れません' } }) },
+      { label: '年金をもらっている（老齢・障害・遺族）', fn: () => afterIncome({ ans: '年金受給', doc: { cat: 'income', label: '年金の振込通知書・改定通知書のコピー', note: '自宅に届く最新のもの（65歳以上の親を入れるときは必ず）' } }) },
+      { label: 'パート・アルバイトの給与だけ', sub: '2026年4月からの新しい扱い', fn: () => afterIncome({ ans: '給与収入のみ', doc: { cat: 'income', label: '労働条件通知書・雇用契約書のコピー ＋ 給与収入のみである旨の申立書', note: '時給・勤務時間など契約上の年収がわかるもの。申立書は届書の申立欄で代用できます。契約書がないときは直近3か月の給与明細（事務所に相談）', isNew: true } }) },
+      { label: '自営業・農業・不動産などの収入がある', fn: () => afterIncome({ ans: '事業等の収入', doc: { cat: 'income', label: '直近の確定申告書のコピー（収支内訳書・決算書つき）', note: '経費を引いたあとの金額で見ます' } }) },
+      { label: '上のどれでもない／わからない', fn: () => afterIncome({ ans: 'その他の収入', doc: { cat: 'income', label: '所得（課税・非課税）証明書', note: '住んでいる市町村の役所で取れます' } }) },
+    ],
+  },
+  q9: {
+    part: 2, label: '事務所に出す書類', qNum: 'Q8　仕送りの証明（別居）',
+    question: 'その家族は<b>学生</b>（高校・大学・専門学校など）ですか？',
+    note: '別居の場合は仕送りの証明が必要です。ただし学生は不要です。',
+    type: 'yesno',
+    onYes: () => go('result', { skip: 'okuri', ans: '別居・学生' }),
+    onNo:  () => go('result', { ans: '別居・学生ではない', doc: { cat: 'okuri', label: '仕送りしていることがわかる書類', note: '振込の控え・通帳のコピーなど（定期的に送っているとわかるもの）' } }),
+  },
+};
+
+const ORDER = ['start', 'q1', 'qAge', 'qRel', 'qIncome', 'qBalance', 'q5', 'q6', 'q8', 'q9'];
+function pct() {
+  const s = state.step === 'qOverseas' ? 'q1' : state.step === 'qChild' ? 'qRel' : state.step === 'q7' ? 'q6' : state.step;
+  const i = ORDER.indexOf(s);
+  return i < 0 ? 100 : Math.round(((i + 1) / (ORDER.length + 1)) * 100);
+}
+
+// ===== 描画 =====
+const val = v => typeof v === 'function' ? v() : v;
+
+function render() {
+  const card = document.getElementById('card');
+  const s = state.step;
+  if (s === 'out') return renderOut(card);
+  if (s === 'result') return renderResult(card);
+  if (s === 'remove') return renderRemove(card);
+  const d = STEPS[s];
+  if (d.skipIf && d.skipIf()) { state.step = 'qBalance'; return render(); }
+
+  choices = [];
+  let btns = '';
+  if (d.type === 'yesno') {
+    choices = [d.onYes, d.onNo];
+    btns = `<div class="btns"><button class="btn btn-yes" onclick="pick(0)">はい</button><button class="btn btn-no" onclick="pick(1)">いいえ</button></div>`;
+  } else {
+    choices = d.choices.map(c => c.fn);
+    btns = `<div class="btns v">` + d.choices.map((c, i) =>
+      `<button class="btn btn-ch" onclick="pick(${i})">${c.label}${c.sub ? `<small>${c.sub}</small>` : ''}</button>`).join('') + `</div>`;
+  }
+  const note = val(d.note);
+  card.innerHTML = `
+    <div class="banner ${d.part === 1 ? 'p1' : 'p2'}">${d.part === 1 ? '第1部' : '第2部'}　${d.label}</div>
+    <div class="progress-wrap"><div class="progress-label">${d.qNum}</div><div class="bar"><div style="width:${pct()}%"></div></div></div>
+    <div class="body">
+      <div class="q-num">${d.qNum}</div>
+      <div class="question">${val(d.question)}</div>
+      ${note ? `<div class="note${d.noteWarn ? ' warn' : ''}${d.noteCo ? ' co' : ''}">${note}</div>` : ''}
+      ${btns}
+    </div>
+    <div class="foot"><button class="link" onclick="back()" ${stack.length ? '' : 'disabled'}>← 前の質問に戻る</button>
+      <button class="link r" onclick="restart()">最初から</button></div>`;
+}
+
+function answersHtml() {
+  return `<div class="sec"><div class="sec-t">あなたの回答</div><div class="answers">${state.answers.map(a => '・' + a).join('<br>')}</div></div>`;
+}
+function actions() {
+  return `<div class="act"><button class="main" onclick="window.print()">🖨 印刷する</button><button class="sub" onclick="restart()">↺ 最初から</button></div>`;
+}
+function foot() {
+  return `<div class="foot"><button class="link" onclick="back()">← 前の質問に戻る</button></div>`;
+}
+
+function renderOut(card) {
+  card.innerHTML = `
+    <div class="banner ng">判定結果</div>
+    <div class="body">
+      <div class="badge ng">扶養には入れない見込み</div>
+      <div class="r-title">理由</div>
+      <div class="r-desc">${state.reason}<br><br>
+        状況が変わるとき（退職・収入が減る・同居する など）や、判定に納得できないときは事務所に相談してください。</div>
+      ${answersHtml()}
+      ${actions()}
+    </div>${foot()}`;
+}
+
+function renderResult(card) {
+  const docs = [...state.docs];
+  if (state.rel === 'naien') {
+    docs.push({ cat: 'naien', label: 'あなたと内縁の配偶者の戸籍謄（抄）本', note: '両方とも婚姻していないことの確認用' });
+    docs.push({ cat: 'naien', label: 'あなたの世帯全員の住民票', note: '同じ世帯に住んでいることの確認用（マイナンバーで確認できる場合は省略可）' });
+  }
+  const cats = [
+    { id: 'zokugara', label: 'A. 続柄の確認' },
+    { id: 'income',   label: 'B. 収入の証明' },
+    { id: 'okuri',    label: 'C. 仕送りの証明' },
+    { id: 'naien',    label: 'D. 内縁関係の確認' },
+  ];
+  let html = '';
+  for (const c of cats) {
+    const list = docs.filter(d => d.cat === c.id);
+    const skipped = state.skips.includes(c.id);
+    if (!list.length && !skipped) continue;
+    html += `<div class="sec"><div class="sec-t">${c.label}</div>`;
+    if (!list.length) html += `<div class="doc skip"><span class="ic">✓</span>提出不要</div>`;
+    for (const d of list) {
+      html += `<div class="doc req"><span class="ic">📄</span><span>${d.label}${d.isNew ? '<span class="tag">2026年4月〜</span>' : ''}${d.note ? `<small>${d.note}</small>` : ''}</span></div>`;
+    }
+    html += `</div>`;
+  }
+
+  // 配偶者なら国民年金第3号
+  const san = isSpouse() && ['a19', 'a23'].includes(state.age)
+    ? `<div class="doc info"><span class="ic">ℹ️</span><span>配偶者が<b>20〜59歳</b>なら、国民年金の「第3号被保険者」の届出も同じ用紙でいっしょに行います。<small>配偶者のマイナンバー（または基礎年金番号）を書きます。60歳以上なら不要です。</small></span></div>` : '';
+
+  card.innerHTML = `
+    <div class="banner ok">判定結果</div>
+    <div class="body">
+      <div class="badge ok">✅ 扶養に入れる見込み</div>
+      <div class="r-title">次の書類をそろえて事務所へ</div>
+      <div class="r-desc">
+        <b>扶養に入る日（結婚・出生・退職などの日）から5日以内</b>に届け出る決まりです。書類がそろわなくても、まず事務所に声をかけてください。<br>
+        <span style="color:var(--warn);font-size:.82rem;">※最終的な認定は年金事務所・協会けんぽの審査で決まります。</span>
+      </div>
+      <div class="sec"><div class="sec-t">必ず出すもの</div>
+        <div class="doc req"><span class="ic">📝</span><span>あなたと家族のマイナンバー<small>届書（健康保険 被扶養者（異動）届）は事務所が作ります。あなたは家族の氏名・生年月日・住所を伝えてください</small></span></div>
+        ${san}
+      </div>
+      ${html}
+      <div class="sec"><div class="sec-t">このあとの流れ（弊社）</div>
+        <ol class="flow">
+          <li>書類を事務所に提出</li>
+          <li>事務所が届書を作り、社労士経由で年金事務所へ届け出</li>
+          <li>認定されると、家族の健康保険（協会けんぽ）が使えるようになります。マイナ保険証を持っていない家族には「資格確認書」が届きます</li>
+          <li>年末調整の<b>扶養控除等（異動）申告書</b>も事務所で直します（給与の税金に関係します）</li>
+        </ol>
+      </div>
+      ${answersHtml()}
+      ${actions()}
+    </div>${foot()}`;
+}
+
+function renderRemove(card) {
+  card.innerHTML = `
+    <div class="banner rm">扶養から外す手続き</div>
+    <div class="body">
+      <div class="badge rm">外す手続きが必要です</div>
+      <div class="r-title">こんなときは事務所へ（5日以内）</div>
+      <div class="r-desc">
+        ・家族が就職して、勤務先の健康保険に入った<br>
+        ・家族の収入が基準（原則130万円／19〜22歳は150万円／60歳以上は180万円）以上になる見込み<br>
+        ・別居して仕送りをしなくなった／離婚した／家族が亡くなった<br>
+        ・家族が75歳になった（後期高齢者医療制度へ。この場合は届出が要らないこともあるので事務所に確認）
+      </div>
+      <div class="sec"><div class="sec-t">事務所に出すもの</div>
+        <div class="doc req"><span class="ic">💳</span><span>家族の「資格確認書」または旧保険証（持っている場合）<small>マイナ保険証だけの場合は返すものはありません</small></span></div>
+        <div class="doc req"><span class="ic">📅</span><span>外れる日（就職日・離婚日など）がわかるもの<small>就職なら新しい勤務先の保険証・資格情報のお知らせのコピーなど</small></span></div>
+      </div>
+      <div class="sec"><div class="sec-t">このあとの流れ（弊社）</div>
+        <ol class="flow">
+          <li>事務所が届書を作り、社労士経由で年金事務所へ届け出</li>
+          <li>年末調整の扶養控除等（異動）申告書も直します（税金の扶養が変わることがあります）</li>
+          <li>家族が国民健康保険に入る場合は、家族本人が役所で手続きします（事務所で「資格喪失証明書」を出せます）</li>
+        </ol>
+      </div>
+      ${actions()}
+    </div>${foot()}`;
+}
+
+render();
+</script>
+</body>
+</html>
