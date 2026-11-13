@@ -170,7 +170,7 @@ function judge(p) {
       out.kihai.push(['特定親族特別控除申告書', '子の氏名・個人番号・生年月日と、今年の所得の見積額を書く']);
     }
     if (a8 < 23 && s8 <= 62) {
-      out.hoken.push(['生命保険料控除 ＞ ☆年齢23歳未満の扶養親族', '新しい生命保険（平成24年以後の契約）を払っている場合だけ、「有」に○をして☆欄に氏名などを書く（控除の上限が6万円に上がる）']);
+      out.hoken.push(['一般の生命保険料 ＞ ☆年齢23歳未満の扶養親族', '新しい生命保険（平成24年以後の契約）を払っている人だけ。☆欄にこの家族の氏名・生年月日・続柄・所得の見積額などを書く（対象の家族が2人以上でも1人書けばよい）。新保険料の控除額は①・④欄ではなく<b>②・⑤欄</b>で計算し、イ欄に⑤の金額を書く（上限が4万円→6万円に上がる）']);
     }
   }
   return { out, res };
@@ -244,22 +244,34 @@ function personHtml(p, i) {
   const block = (title, arr) => `<div class="form"><span class="form-t">${title}</span>` +
     (arr.length ? arr.map(([where, what]) => `<div class="w"><b>${where}</b><small>${what}</small></div>`).join('') : `<div class="none">書かない</div>`) + `</div>`;
   const sh = (s) => Math.round(s * 10) / 10;
+  const changes = changesNextYear(out);
   return `<div class="person">
     <button class="del" onclick="del(${i})">削除</button>
     <div class="p-head">${i + 1}. ${REL[p.rel]}（${p.y}年${p.m}月${p.d}日生）</div>
     <div class="p-sub">12月31日の年齢：令和8年分 ${res.r8.age}歳／令和9年分 ${res.r9.age}歳　・　所得の見積額：約${sh(res.r8.s)}万円</div>
     ${block('令和8年分 扶養控除等（異動）申告書（去年出したもの・返却分）', out.r8)}
     ${block('令和9年分 扶養控除等（異動）申告書', out.r9)}
+    ${changes ? `<div class="w" style="background:#fdeeea;border-color:#e3b2a6;color:#6b2a1f"><b>来年は書く欄が変わります</b><small>令和9年分は「簡易な申告書」（「なし」に✓）は使えません。普通の用紙に全部書いてください。</small></div>` : ''}
     ${block('令和8年分 基・配・特・所', out.kihai)}
     ${out.hoken.length ? block('令和8年分 保険料控除申告書', out.hoken) : ''}
   </div>`;
 }
 
+// 令和8年分と令和9年分で書く欄・✓が変わるか（年齢で区分が変わる家族など）
+function changesNextYear(out) {
+  const k = arr => arr.map(a => a[0] + '|' + (a[1].match(/「[^」]+」に✓/g) || []).join('')).join('/');
+  return k(out.r8) !== k(out.r9);
+}
+
 function renderList(card) {
+  const anyChange = people.some(p => changesNextYear(judge(p).out));
   card.innerHTML = `
     <div class="banner ok">書く場所のまとめ</div>
     <div class="body">
       <div class="note warn">令和8年分（返却分）の用紙には去年の基準（123万円など）が印刷されていますが、<b>今年は下の判定どおり</b>に書き足し・訂正してください（今年の改正で、新しく書ける家族がいます）。</div>
+      <div class="note">${anyChange
+        ? '<b>令和9年分は普通の用紙に全部書いてください</b>（来年、書く欄が変わる家族がいます）。'
+        : '令和9年分は、家族・年収などが去年（令和8年分）と同じなら「簡易な申告書」（右上に「前年の申告内容からの異動 □なし」）で、色の付いた欄（フリガナ・氏名・個人番号・住所）だけ書いて「なし」に✓でOK。変わりがあれば普通の用紙に全部書きます。'}</div>
       ${people.map(personHtml).join('')}
       <button class="btn main" onclick="cur=blank();render();window.scrollTo(0,0)">＋ 次の家族を入力</button>
       <div class="send noprint" style="margin-top:16px">
