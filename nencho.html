@@ -425,9 +425,23 @@ function renderResult(card) {
       ${c ? `<div class="sec"><div class="sec-t">C. 前の会社・住宅ローン</div>${c}</div>` : ''}
       ${d ? `<div class="sec"><div class="sec-t">気をつけること</div>${d}</div>` : ''}
       ${e ? `<div class="sec"><div class="sec-t">年末調整ではできない → 自分で確定申告（翌年2/16〜3/15）</div>${e}</div>` : ''}
+      ${kakikataLink(f, spouseIn)}
       ${answersHtml()}
       ${actions()}
     </div>${foot()}`;
+}
+
+// 家族がいる人だけ「書き方ナビ」への入口を出す
+function kakikataLink(f, spouseIn) {
+  const h = new URLSearchParams();
+  if (spouseIn) h.set('sp', 1);
+  if (f.kid15) h.set('k15', 1);
+  if (f.kid16) h.set('k16', 1);
+  if (f.kid19) h.set('k19', 1);
+  if (f.oya) h.set('oya', 1);
+  if (!h.toString()) return '';
+  return `<div class="sec"><div class="sec-t">家族の書き方</div>
+    <a class="doc info" href="kakikata.html#${h}" style="text-decoration:none"><span class="ic">✍️</span><span><b>家族をどの欄に書くか見る</b><small>家族1人ずつ、生年月日と年収を入れると、申告書のどの欄に書くかがわかります（年齢・年収で書く場所が変わります）</small></span></a></div>`;
 }
 
 const NAVI_NAME = '年末調整ナビ';
@@ -449,7 +463,7 @@ function resultText() {
   if (badge) lines.push('判定：' + badge.innerText.replace(/^[^ぁ-んァ-ヶ一-龠A-Za-z0-9]+/, '').trim());
   document.querySelectorAll('#card .sec').forEach(sec => {
     const h = sec.querySelector('.sec-t');
-    if (!h) return;
+    if (!h || h.innerText.trim() === '家族の書き方') return;
     lines.push('', '■' + h.innerText.trim());
     const docs = sec.querySelectorAll('.doc');
     if (docs.length) {

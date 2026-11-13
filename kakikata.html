@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>家族の書き方ナビ（平成造園）</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #2f6b3a; --brand-dk: #234f2b; --brand-lt: #eaf4ec;
+    --ink: #1f2a22; --sub: #5d6b61; --line: #dfe7e1;
+    --warn: #d9822b;
+  }
+  body {
+    font-family: "Meiryo", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #eef3ef; color: var(--ink);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 40px;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  header .co { font-size: .78rem; color: var(--brand); font-weight: bold; letter-spacing: .08em; }
+  header h1 { font-size: 1.3rem; color: var(--brand-dk); margin-top: 2px; }
+  header p { font-size: .8rem; color: var(--sub); margin-top: 4px; line-height: 1.6; }
+
+  #card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.08); width: 100%; max-width: 600px; overflow: hidden; }
+  .banner { padding: 10px 20px; font-size: .78rem; font-weight: bold; letter-spacing: .05em; color: #fff; background: #3c6e8f; }
+  .banner.ok { background: #2e8b4a; }
+  .body { padding: 20px 22px; }
+  .q { font-size: 1rem; font-weight: bold; margin: 16px 0 8px; }
+  .q:first-child { margin-top: 0; }
+  .hint { font-size: .78rem; color: var(--sub); line-height: 1.6; margin-top: 4px; }
+  .note { background: #f2f7f3; border-left: 3px solid var(--brand); border-radius: 4px; padding: 9px 12px; font-size: .81rem; color: #3f4a43; line-height: 1.7; margin-bottom: 14px; }
+  .note.warn { background: #fff8ee; border-left-color: var(--warn); }
+
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip { padding: 10px 14px; border-radius: 999px; border: 2px solid #d3e0d6; background: #f6faf7; font-size: .9rem; font-weight: bold; cursor: pointer; font-family: inherit; color: var(--ink); }
+  .chip.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+
+  .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  select, input[type=number], input[type=text] { font-size: 1rem; padding: 9px 10px; border: 1px solid #c9d6cc; border-radius: 8px; font-family: inherit; background: #fff; }
+  input[type=number] { width: 110px; }
+  #f_y { width: 8.2em; } #f_m, #f_d { width: 4.4em; }
+  .row.bd { flex-wrap: nowrap; gap: 4px; }
+  .unit { font-size: .9rem; color: var(--sub); }
+  .inc { display: grid; grid-template-columns: 1fr auto; gap: 8px 10px; align-items: center; font-size: .9rem; }
+
+  .btn { display: block; width: 100%; padding: 13px; border: none; border-radius: 10px; font-size: .95rem; font-weight: bold; cursor: pointer; font-family: inherit; margin-top: 18px; }
+  .btn.main { background: var(--brand); color: #fff; }
+  .btn.sub { background: #e8eee9; color: var(--ink); margin-top: 8px; }
+  .btn.line { background: #06c755; color: #fff; }
+  .err { color: #b8432f; font-size: .85rem; margin-top: 10px; font-weight: bold; }
+
+  .person { border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 14px; }
+  .p-head { font-weight: bold; color: var(--brand-dk); margin-bottom: 4px; }
+  .p-sub { font-size: .78rem; color: var(--sub); margin-bottom: 10px; line-height: 1.6; }
+  .form { margin-top: 10px; }
+  .form-t { font-size: .8rem; font-weight: bold; color: #fff; background: #3c6e8f; display: inline-block; padding: 2px 10px; border-radius: 6px; }
+  .w { background: #fef9e7; border: 1px solid #efcf7a; border-radius: 8px; padding: 8px 12px; margin-top: 6px; font-size: .88rem; line-height: 1.6; color: #5e4300; }
+  .w b { color: #3d2c00; }
+  .w small { display: block; font-size: .78rem; color: #7d6a3c; margin-top: 2px; }
+  .none { font-size: .85rem; color: #6f7b73; background: #f2f2f2; border-radius: 8px; padding: 8px 12px; margin-top: 6px; }
+  .del { float: right; background: none; border: none; color: #b8432f; font-size: .78rem; cursor: pointer; font-family: inherit; }
+
+  .meta { max-width: 600px; width: 100%; font-size: .72rem; color: #8a958d; line-height: 1.7; margin-top: 14px; }
+  .meta a { color: #3c6e8f; }
+  @media print {
+    body { background: #fff; padding: 0; }
+    #card { box-shadow: none; max-width: none; }
+    .noprint, .del, .btn { display: none !important; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="co">株式会社平成造園　社内用</div>
+  <h1>家族の書き方ナビ（令和8年分 年末調整）</h1>
+  <p>家族1人ずつ答えると、<b>どの申告書のどの欄に書くか</b>がわかります。</p>
+</header>
+
+<div id="card"></div>
+
+<div class="meta noprint">
+  基準：国税庁「令和8年分・令和9年分 扶養控除等（異動）申告書」「令和8年分 基・配・特・所」「令和8年分 保険料控除申告書」の記載どおり。
+  あなた（社員）の年収が1,095万円以下の場合の目安です。最終的な確認は事務所へ。
+  入力した内容は、自分で LINE などに送らない限り、どこにも送られません。
+  <br><a href="nencho.html">← 年末調整ナビへ</a>
+</div>
+
+<script>
+// ===== 基本の数字（令和8・9年分） =====
+// 給与だけ → 所得（令和8・9年分の給与所得控除。最低74万円）
+function kyuyoShotoku(g) {
+  if (g <= 0) return 0;
+  if (g < 220) return Math.max(0, g - 74);
+  if (g < 360) return g - (g * 0.3 + 8);
+  if (g < 660) return g - (g * 0.2 + 44);
+  if (g < 850) return g - (g * 0.1 + 110);
+  return g - 195;
+}
+// 公的年金 → 所得（年金以外の所得が1,000万円以下の場合）
+function nenkinShotoku(p, age65) {
+  if (p <= 0) return 0;
+  if (age65) { if (p <= 330) return Math.max(0, p - 110); if (p <= 410) return p * 0.75 - 27.5; return p * 0.85 - 68.5; }
+  if (p <= 130) return Math.max(0, p - 60);
+  if (p <= 410) return p * 0.75 - 27.5;
+  return p * 0.85 - 68.5;
+}
+// 年齢は「その年の12月31日」で数える（＝翌年1月1日の満年齢）
+function ageAtYearEnd(y, m, d, year) {
+  const ref = new Date(year + 1, 0, 1);
+  let a = ref.getFullYear() - y;
+  if (ref.getMonth() + 1 < m || (ref.getMonth() + 1 === m && ref.getDate() < d)) a--;
+  return a;
+}
+const wareki = y => y >= 2019 ? `令${y - 2018 === 1 ? '元' : y - 2018}` : y >= 1989 ? `平${y - 1988 === 1 ? '元' : y - 1988}` : y >= 1926 ? `昭${y - 1925}` : `大${y - 1911}`;
+
+// ===== 状態 =====
+const REL = { sp: '配偶者', ko: '子・孫', oya: '父母・祖父母', ot: 'その他の親族' };
+let people = [];
+let cur = null;
+const hint = new URLSearchParams(location.hash.slice(1));
+
+function blank(rel) {
+  return { rel: rel || '', y: '', m: '', d: '', dokyo: false, shogai: 'no', kyuyo: '', nenkin: '', hoka: '' };
+}
+
+// ===== 1人の判定 =====
+function judge(p) {
+  const out = { r8: [], r9: [], kihai: [], hoken: [] };
+  const by = +p.y, bm = +p.m, bd = +p.d;
+  const g = +p.kyuyo || 0, pn = +p.nenkin || 0, other = +p.hoka || 0;
+  const res = {};
+  for (const [key, year] of [['r8', 2026], ['r9', 2027]]) {
+    const age = ageAtYearEnd(by, bm, bd, year);
+    const s = kyuyoShotoku(g) + nenkinShotoku(pn, age >= 65) + other;
+    res[key] = { age, s };
+  }
+  const shogaiTxt = p.shogai === 'toku' ? '特別障害者' : '一般の障害者';
+
+  if (p.rel === 'sp') {
+    for (const key of ['r8', 'r9']) {
+      const { s } = res[key];
+      if (s <= 95) out[key].push(['A 源泉控除対象配偶者', '氏名・個人番号・生年月日・所得の見積額を書く']);
+      if (p.shogai !== 'no' && s <= 62) out[key].push(['C 障害者、寡婦、ひとり親又は勤労学生', `「同一生計配偶者」の${shogaiTxt}に○（人数）。下の「障害者又は勤労学生の内容」欄に内容を書く`]);
+    }
+    const s8 = res.r8.s, age8 = res.r8.age;
+    if (s8 <= 133) {
+      out.kihai.push(['配偶者控除等申告書', `配偶者の氏名・個人番号・生年月日と、今年の所得の見積額を書く${s8 <= 62 ? (age8 >= 70 ? '（配偶者控除・70歳以上＝老人控除対象配偶者）' : '（配偶者控除）') : '（配偶者特別控除）'}`]);
+    }
+  } else {
+    for (const key of ['r8', 'r9']) {
+      const { age, s } = res[key];
+      const fuyo = s <= 62;
+      if (fuyo && age < 16) {
+        out[key].push(['住民税に関する事項 ＞ 16歳未満の扶養親族', '氏名・個人番号・生年月日を書く（税金の控除はないが、住民税の計算に使う）']);
+      } else if (fuyo && age >= 16) {
+        let chk = '';
+        if (age >= 70) chk = (p.rel === 'oya' && p.dokyo) ? '「老人扶養親族」の「同居老親等」に✓' : '「老人扶養親族」の「その他」に✓';
+        else if (age >= 19 && age <= 22) chk = '「特定扶養親族・特定親族」の「特定扶養親族」に✓';
+        out[key].push(['B 源泉控除対象親族（16歳以上）', '氏名・個人番号・続柄・生年月日・所得の見積額を書く' + (chk ? '。' + chk : '')]);
+      } else if (age >= 19 && age <= 22 && s <= 100) {
+        out[key].push(['B 源泉控除対象親族（16歳以上）', '氏名・個人番号・続柄・生年月日・所得の見積額を書く。「特定扶養親族・特定親族」の「特定親族」に✓']);
+      }
+      if (p.shogai !== 'no' && fuyo) out[key].push(['C 障害者、寡婦、ひとり親又は勤労学生', `「扶養親族」の${shogaiTxt}に人数。下の「障害者又は勤労学生の内容」欄に内容を書く`]);
+    }
+    const { age: a8, s: s8 } = res.r8;
+    if (a8 >= 19 && a8 <= 22 && s8 > 62 && s8 <= 123) {
+      out.kihai.push(['特定親族特別控除申告書', '子の氏名・個人番号・生年月日と、今年の所得の見積額を書く']);
+    }
+    if (a8 < 23 && s8 <= 62) {
+      out.hoken.push(['生命保険料控除 ＞ ☆年齢23歳未満の扶養親族', '新しい生命保険（平成24年以後の契約）を払っている場合だけ、「有」に○をして☆欄に氏名などを書く（控除の上限が6万円に上がる）']);
+    }
+  }
+  return { out, res };
+}
+
+// ===== 画面 =====
+function render() {
+  const card = document.getElementById('card');
+  if (cur) return renderForm(card);
+  renderList(card);
+}
+
+function chips(name, opts, val) {
+  return `<div class="chips">` + Object.entries(opts).map(([k, v]) =>
+    `<button type="button" class="chip${val === k ? ' on' : ''}" onclick="setv('${name}','${k}')">${v}</button>`).join('') + `</div>`;
+}
+function setv(k, v) { readInputs(); cur[k] = v; render(); }
+function readInputs() {
+  for (const k of ['y', 'm', 'd', 'kyuyo', 'nenkin', 'hoka']) {
+    const e = document.getElementById('f_' + k); if (e) cur[k] = e.value;
+  }
+  const dk = document.getElementById('f_dokyo'); if (dk) cur.dokyo = dk.checked;
+}
+
+function renderForm(card) {
+  const ys = []; for (let y = 2026; y >= 1920; y--) ys.push(y);
+  const opt = (arr, v, f) => `<option value="">--</option>` + arr.map(x => `<option value="${x}"${String(v) === String(x) ? ' selected' : ''}>${f ? f(x) : x}</option>`).join('');
+  const range = (a, b) => Array.from({ length: b - a + 1 }, (_, i) => a + i);
+  const fromNencho = hint.toString() && !people.length
+    ? `<div class="note">年末調整ナビの答えから：${[hint.get('sp') && '配偶者', hint.get('k15') && '16歳未満の子', hint.get('k16') && '16〜18歳の子', hint.get('k19') && '19〜22歳の子', hint.get('oya') && '親など'].filter(Boolean).join('・')}。<b>1人ずつ</b>入力してください。</div>` : '';
+  card.innerHTML = `
+    <div class="banner">${people.length + 1}人目の家族</div>
+    <div class="body">
+      ${fromNencho}
+      <div class="q">あなたから見て</div>
+      ${chips('rel', REL, cur.rel)}
+      <div class="q">生年月日</div>
+      <div class="row bd">
+        <select id="f_y">${opt(ys, cur.y, y => `${y}（${wareki(y)}）`)}</select><span class="unit">年</span>
+        <select id="f_m">${opt(range(1, 12), cur.m)}</select><span class="unit">月</span>
+        <select id="f_d">${opt(range(1, 31), cur.d)}</select><span class="unit">日</span>
+      </div>
+      <div class="hint">年齢は申告書の年ごとに12月31日で数えます（令和8年分と令和9年分で1歳ずれます）。</div>
+      ${cur.rel === 'oya' ? `<div class="q">同居</div><label class="row"><input type="checkbox" id="f_dokyo"${cur.dokyo ? ' checked' : ''}> いつも一緒に住んでいる（老人ホームは除く）</label>` : ''}
+      <div class="q">障害者手帳など</div>
+      ${chips('shogai', { no: 'なし', ippan: '障害者', toku: '特別障害者（1級・2級など）' }, cur.shogai)}
+      <div class="q">今年（1〜12月）の収入の見込み</div>
+      <div class="inc">
+        <span>給与・アルバイト代（交通費は除く）</span><span class="row"><input type="number" id="f_kyuyo" min="0" step="0.1" value="${cur.kyuyo}" inputmode="decimal"><span class="unit">万円</span></span>
+        <span>公的年金（老齢年金など）</span><span class="row"><input type="number" id="f_nenkin" min="0" step="0.1" value="${cur.nenkin}" inputmode="decimal"><span class="unit">万円</span></span>
+        <span>そのほかの<b>所得</b>（自営業・農業などの収入−経費）</span><span class="row"><input type="number" id="f_hoka" min="0" step="0.1" value="${cur.hoka}" inputmode="decimal"><span class="unit">万円</span></span>
+      </div>
+      <div class="hint">ないものは空欄のまま。遺族年金・障害年金・失業給付は税金の計算では収入に入れません。来年（令和9年分）も同じくらいと考えて判定します。</div>
+      <div id="err"></div>
+      <button class="btn main" onclick="save()">この家族の書く場所を見る</button>
+      ${people.length ? `<button class="btn sub" onclick="cur=null;render()">入力をやめて一覧へ</button>` : ''}
+    </div>`;
+}
+
+function save() {
+  readInputs();
+  const err = document.getElementById('err');
+  if (!cur.rel) { err.innerHTML = '<div class="err">続柄を選んでください</div>'; return; }
+  if (!cur.y || !cur.m || !cur.d) { err.innerHTML = '<div class="err">生年月日を選んでください</div>'; return; }
+  people.push(cur); cur = null; render(); window.scrollTo(0, 0);
+}
+function del(i) { people.splice(i, 1); if (!people.length) cur = blank(); render(); }
+
+function personHtml(p, i) {
+  const { out, res } = judge(p);
+  const block = (title, arr) => `<div class="form"><span class="form-t">${title}</span>` +
+    (arr.length ? arr.map(([where, what]) => `<div class="w"><b>${where}</b><small>${what}</small></div>`).join('') : `<div class="none">書かない</div>`) + `</div>`;
+  const sh = (s) => Math.round(s * 10) / 10;
+  return `<div class="person">
+    <button class="del" onclick="del(${i})">削除</button>
+    <div class="p-head">${i + 1}. ${REL[p.rel]}（${p.y}年${p.m}月${p.d}日生）</div>
+    <div class="p-sub">12月31日の年齢：令和8年分 ${res.r8.age}歳／令和9年分 ${res.r9.age}歳　・　所得の見積額：約${sh(res.r8.s)}万円</div>
+    ${block('令和8年分 扶養控除等（異動）申告書（去年出したもの・返却分）', out.r8)}
+    ${block('令和9年分 扶養控除等（異動）申告書', out.r9)}
+    ${block('令和8年分 基・配・特・所', out.kihai)}
+    ${out.hoken.length ? block('令和8年分 保険料控除申告書', out.hoken) : ''}
+  </div>`;
+}
+
+function renderList(card) {
+  card.innerHTML = `
+    <div class="banner ok">書く場所のまとめ</div>
+    <div class="body">
+      <div class="note warn">令和8年分（返却分）の用紙には去年の基準（123万円など）が印刷されていますが、<b>今年は下の判定どおり</b>に書き足し・訂正してください（今年の改正で、新しく書ける家族がいます）。</div>
+      ${people.map(personHtml).join('')}
+      <button class="btn main" onclick="cur=blank();render();window.scrollTo(0,0)">＋ 次の家族を入力</button>
+      <div class="send noprint" style="margin-top:16px">
+        <div class="q">あなたの氏名（送るときに入ります）</div>
+        <input type="text" id="nm" style="width:100%" placeholder="例：平成 太郎" value="${savedName.replace(/"/g, '')}" oninput="savedName=this.value;try{localStorage.setItem('navi_name',this.value)}catch(e){}">
+        <button class="btn line" onclick="sendLine()">LINEで事務所に送る</button>
+        <button class="btn sub" onclick="copyText()">文章をコピー</button>
+        <button class="btn sub" onclick="window.print()">🖨 印刷する</button>
+      </div>
+    </div>`;
+}
+
+// ===== 送る =====
+let savedName = '';
+try { savedName = localStorage.getItem('navi_name') || ''; } catch (e) {}
+function resultText() {
+  const name = (document.getElementById('nm')?.value || '').trim();
+  const lines = ['【家族の書き方ナビの結果】', `氏名：${name || '（未入力）'}`];
+  people.forEach((p, i) => {
+    const { out, res } = judge(p);
+    lines.push('', `■${i + 1}. ${REL[p.rel]}（${p.y}年${p.m}月${p.d}日生・R8 ${res.r8.age}歳・所得約${Math.round(res.r8.s * 10) / 10}万円）`);
+    const add = (t, arr) => { if (arr.length) lines.push(`［${t}］` + arr.map(a => a[0]).join('／')); };
+    add('令和8年分 扶養（返却分）', out.r8); add('令和9年分 扶養', out.r9); add('基・配・特・所', out.kihai); add('保険料控除', out.hoken);
+    if (![...out.r8, ...out.r9, ...out.kihai].length) lines.push('［書かない］');
+  });
+  return lines.join('\n');
+}
+function sendLine() { location.href = 'https://line.me/R/share?text=' + encodeURIComponent(resultText()); }
+async function copyText() {
+  const t = resultText();
+  try { await navigator.clipboard.writeText(t); alert('コピーしました。LINEやメールに貼り付けて送ってください。'); }
+  catch (e) { prompt('この文章をコピーしてください', t); }
+}
+
+// ===== はじめ =====
+cur = blank(hint.get('sp') ? 'sp' : (hint.get('k15') || hint.get('k16') || hint.get('k19')) ? 'ko' : hint.get('oya') ? 'oya' : '');
+render();
+</script>
+</body>
+</html>
