@@ -17,6 +17,8 @@
   a.item:hover { border-color: #2f6b3a; }
   .t { font-size: 1.05rem; font-weight: bold; color: #234f2b; }
   .d { font-size: .82rem; color: #5d6b61; margin-top: 4px; line-height: 1.6; }
+  a.item.now { border-color: #d9822b; background: #fff8ee; box-shadow: 0 3px 16px rgba(217,130,43,.25); }
+  .badge-now { display: inline-block; background: #d9822b; color: #fff; font-size: .74rem; font-weight: bold; padding: 2px 10px; border-radius: 999px; margin-bottom: 6px; }
   .meta { max-width: 560px; font-size: .72rem; color: #8a958d; margin-top: 18px; line-height: 1.7; }
 </style>
 </head>
@@ -26,12 +28,27 @@
   <h1>手続きナビ</h1>
   <p>質問に答えるだけで、必要な書類がわかります。</p>
 </header>
-<div class="list">
-  <a class="item" href="nencho.html"><div class="t">🧾 年末調整ナビ（令和8年分）</div><div class="d">年末調整で出す申告書と、付ける証明書</div></a>
-  <a class="item" href="fuyou.html"><div class="t">👪 扶養判定ナビ（健康保険・年金）</div><div class="d">家族を扶養に入れられるか・外すとき、事務所に出す書類</div></a>
+<div class="list" id="list">
+  <a class="item now" id="nencho" href="nencho.html"><div class="badge-now" id="nencho-badge">📌 今の時期：提出は11月27日（金）まで</div><div class="t">🧾 年末調整ナビ（令和8年分）</div><div class="d">年末調整で出す申告書と、付ける証明書</div></a>
   <a class="item" href="byouki.html"><div class="t">🩹 病気・ケガで休むときナビ</div><div class="d">仕事中・通勤中のケガ（労災）と、それ以外の病気・ケガ（健康保険）で使える制度と、事務所に出すもの</div></a>
+  <a class="item" href="fuyou.html"><div class="t">👪 扶養判定ナビ（健康保険・年金）</div><div class="d">家族を扶養に入れられるか・外すとき、事務所に出す書類</div></a>
   <a class="item" href="fuyou-line-r8.png"><div class="t">📊 扶養ライン（令和8年分）</div><div class="d">家族の年収で、税金・社会保険の扶養がどう変わるかの早見表</div></a>
 </div>
 <div class="meta">2026年11月時点の制度にもとづく目安です。最終的な判断は事務所にご確認ください。入力した内容は、自分で LINE などに送らない限り、どこにも送られません（氏名だけ、次に入れる手間をはぶくため、この端末に覚えます）。</div>
+<script>
+// 年末調整の時期の目印。提出期日を過ぎたら目印の文を変え、年末を過ぎたら一番下へ移して目印を外す。
+(function () {
+  var KIGEN = new Date(2026, 10, 28);   // 11/27（金）の翌日 0時
+  var OWARI = new Date(2027, 0, 1);     // 年末調整の時期の終わり（この日から一番下へ）
+  var now = new Date();
+  var a = document.getElementById('nencho'), b = document.getElementById('nencho-badge');
+  if (now >= OWARI) {
+    a.classList.remove('now'); b.parentNode.removeChild(b);
+    document.getElementById('list').appendChild(a);
+  } else if (now >= KIGEN) {
+    b.textContent = '📌 今の時期：年末調整（提出がまだの方は事務所へ）';
+  }
+})();
+</script>
 </body>
 </html>
