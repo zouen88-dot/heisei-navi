@@ -275,7 +275,7 @@ function renderList(card) {
       <div class="note">${anyChange
         ? '<b>令和9年分は普通の用紙に全部書いてください</b>（来年、書く欄が変わる家族がいます）。'
         : '令和9年分は、事務所がお名前・住所を書いた「簡易な用紙」を渡します。家族・年収などが令和8年分と同じなら、右上の「なし」に✓だけでOK。変わりがあれば普通の用紙に全部書きます。'}</div>
-      <div class="note">マイナンバー（個人番号）は会社で管理しているので、<b>どの申告書にも書かなくて大丈夫</b>です（個人番号の欄には横線を引いています）。</div>
+      <div class="note">マイナンバー（個人番号）は会社で管理しているので、<b>どの申告書にも書かなくて大丈夫</b>です（個人番号の欄には横線を引いています）。今年入社の方は、扶養に入れる家族の個人番号だけ書いてください。</div>
       ${people.map(personHtml).join('')}
       <button class="btn main" onclick="cur=blank();render();window.scrollTo(0,0)">＋ 次の家族を入力</button>
       <div class="send noprint" style="margin-top:16px">
