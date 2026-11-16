@@ -254,7 +254,7 @@ function personHtml(p, i) {
     <div class="p-sub">12月31日の年齢：令和8年分 ${res.r8.age}歳／令和9年分 ${res.r9.age}歳　・　所得の見積額：約${sh(res.r8.s)}万円</div>
     ${block('令和8年分 扶養控除等（異動）申告書（去年出したもの・返却分）', out.r8, 'r8')}
     ${block('令和9年分 扶養控除等（異動）申告書', out.r9, 'r9')}
-    ${changes ? `<div class="w" style="background:#fdeeea;border-color:#e3b2a6;color:#6b2a1f"><b>来年は書く欄が変わります</b><small>令和9年分は「簡易な申告書」（「なし」に✓）は使えません。普通の用紙に全部書いてください。</small></div>` : ''}
+    ${changes ? `<div class="w" style="background:#fdeeea;border-color:#e3b2a6;color:#6b2a1f"><b>来年は書く欄が変わります</b><small>令和9年分の用紙（去年の内容を書き写したもの）を、上の書く場所に合わせて二重線で直してください。</small></div>` : ''}
     ${block('令和8年分 基・配・特・所', out.kihai, 'kihai')}
     ${out.hoken.length ? block('令和8年分 保険料控除申告書', out.hoken, 'hoken') : ''}
   </div>`;
@@ -273,8 +273,8 @@ function renderList(card) {
     <div class="body">
       <div class="note warn">令和8年分（返却分）の用紙には去年の基準（123万円など）が印刷されていますが、<b>今年は下の判定どおり</b>に書き足し・訂正してください（今年の改正で、新しく書ける家族がいます）。</div>
       <div class="note">${anyChange
-        ? '<b>令和9年分は普通の用紙に全部書いてください</b>（来年、書く欄が変わる家族がいます）。'
-        : '令和9年分は、事務所がお名前・住所を書いた「簡易な用紙」を渡します。家族・年収などが令和8年分と同じなら、右上の「なし」に✓だけでOK。変わりがあれば普通の用紙に全部書きます。'}</div>
+        ? '令和9年分は、事務所が去年の内容を書き写した用紙を渡します。<b>来年、書く欄が変わる家族がいる</b>ので、下の書く場所に合わせて二重線で直してください。'
+        : '令和9年分は、事務所が去年の内容を書き写した用紙を渡します。下の書く場所と合っているか確かめ、違うところは二重線で直してください。家族の「所得の見積額」は来年の見込みを書きます。'}</div>
       <div class="note">マイナンバー（個人番号）は会社で管理しているので、<b>どの申告書にも書かなくて大丈夫</b>です（個人番号の欄には横線を引いています）。今年入社の方は、扶養に入れる家族の個人番号だけ書いてください。</div>
       ${people.map(personHtml).join('')}
       <button class="btn main" onclick="cur=blank();render();window.scrollTo(0,0)">＋ 次の家族を入力</button>
