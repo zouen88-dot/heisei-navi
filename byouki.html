@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex, nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>病気・ケガで休むときナビ（平成造園）</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --brand: #2f6b3a; --brand-dk: #234f2b; --brand-lt: #eaf4ec;
+    --ink: #1f2a22; --sub: #5d6b61; --line: #dfe7e1;
+    --ok: #2e8b4a; --ng: #b8432f; --warn: #d9822b;
+  }
+  body {
+    font-family: "Meiryo", "Hiragino Sans", "Yu Gothic", sans-serif;
+    background: #eef3ef; color: var(--ink);
+    min-height: 100vh; display: flex; flex-direction: column; align-items: center;
+    padding: 20px 16px 40px;
+  }
+  header { text-align: center; margin-bottom: 18px; }
+  header .co { font-size: .78rem; color: var(--brand); font-weight: bold; letter-spacing: .08em; }
+  header h1 { font-size: 1.3rem; color: var(--brand-dk); margin-top: 2px; }
+  header p { font-size: .8rem; color: var(--sub); margin-top: 4px; line-height: 1.6; }
+
+  #card { background: #fff; border-radius: 16px; box-shadow: 0 4px 24px rgba(0,0,0,.08); width: 100%; max-width: 600px; overflow: hidden; transition: opacity .18s ease, transform .18s ease; }
+  #card.fade-out { opacity: 0; transform: translateY(8px); }
+
+  .banner { padding: 10px 20px; font-size: .78rem; font-weight: bold; letter-spacing: .05em; color: #fff; }
+  .banner.p1 { background: var(--brand); }
+  .banner.p2 { background: #3c6e8f; }
+  .banner.p3 { background: #7a5c2e; }
+  .banner.ok { background: var(--ok); }
+  .banner.ng { background: #6f7b73; }
+
+  .progress-wrap { padding: 10px 20px 0; }
+  .progress-label { font-size: .75rem; color: #8a958d; margin-bottom: 5px; }
+  .bar { height: 5px; background: #e5ece7; border-radius: 9999px; overflow: hidden; }
+  .bar > div { height: 100%; background: linear-gradient(90deg, #4f9a5f, #3c6e8f); transition: width .3s ease; }
+
+  .body { padding: 22px 24px 20px; }
+  .q-num { font-size: .75rem; color: var(--brand); font-weight: bold; margin-bottom: 8px; letter-spacing: .06em; }
+  .question { font-size: 1.05rem; font-weight: bold; line-height: 1.65; margin-bottom: 12px; }
+  .note { background: #f2f7f3; border-left: 3px solid var(--brand); border-radius: 4px; padding: 9px 12px; font-size: .81rem; color: #3f4a43; line-height: 1.7; margin-bottom: 18px; }
+  .note.warn { background: #fff8ee; border-left-color: var(--warn); }
+
+  .btns { display: flex; gap: 10px; margin-top: 4px; }
+  .btns.v { flex-direction: column; }
+  .btn { flex: 1; padding: 13px 12px; border-radius: 10px; border: 2px solid transparent; font-size: .95rem; font-weight: bold; cursor: pointer; transition: all .15s ease; text-align: center; line-height: 1.4; font-family: inherit; }
+  .btn:active { transform: scale(.97); }
+  .btn-yes { background: var(--brand); color: #fff; border-color: var(--brand); }
+  .btn-yes:hover { background: var(--brand-dk); }
+  .btn-no { background: #fff; color: var(--ng); border-color: var(--ng); }
+  .btn-no:hover { background: #fdf2f0; }
+  .btn-ch { background: #f6faf7; color: var(--ink); border-color: #d3e0d6; text-align: left; padding: 12px 16px; }
+  .btn-ch:hover { background: var(--brand-lt); border-color: var(--brand); }
+  .btn-ch small, .chk small { display: block; font-size: .77rem; color: #6f7b73; font-weight: normal; margin-top: 3px; }
+
+  .chk { display: flex; gap: 10px; align-items: flex-start; padding: 11px 14px; border: 2px solid #d3e0d6; border-radius: 10px; background: #f6faf7; cursor: pointer; font-weight: bold; font-size: .93rem; line-height: 1.45; }
+  .chk:has(input:checked) { background: var(--brand-lt); border-color: var(--brand); }
+  .chk input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--brand); flex-shrink: 0; }
+  .next { margin-top: 8px; }
+
+  .foot { border-top: 1px solid #eef2ef; padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+  .link { background: none; border: none; color: #6f7b73; font-size: .83rem; cursor: pointer; font-family: inherit; }
+  .link:hover { color: var(--brand); }
+  .link:disabled { opacity: .3; cursor: default; }
+  .link.r { margin-left: auto; }
+
+  .badge { display: inline-block; font-size: 1.1rem; font-weight: bold; padding: 9px 20px; border-radius: 30px; margin-bottom: 14px; }
+  .badge.ok { background: #dcf3e3; color: #1e6b37; }
+  .badge.ng { background: #e8ece9; color: #3f4a43; }
+  .r-title { font-size: 1.05rem; font-weight: bold; margin-bottom: 8px; }
+  .r-desc { font-size: .86rem; color: #4d5a51; line-height: 1.75; margin-bottom: 18px; }
+
+  .sec { margin-bottom: 18px; }
+  .sec-t { font-size: .8rem; font-weight: bold; color: var(--brand-dk); margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--line); }
+  .doc { display: flex; gap: 8px; padding: 9px 12px; border-radius: 8px; margin-bottom: 6px; font-size: .88rem; line-height: 1.55; }
+  .doc.req { background: #fef9e7; border: 1px solid #efcf7a; color: #5e4300; }
+  .doc.att { background: #fff; border: 1px dashed #d9b75a; color: #5e4300; margin-left: 18px; }
+  .doc.info { background: #eef5fb; border: 1px solid #c4dbef; color: #23465f; }
+  .doc.self { background: #f6eeee; border: 1px solid #e3c2bb; color: #6b2a1f; }
+  .doc .ic { flex-shrink: 0; }
+  .doc small { display: block; font-size: .78rem; opacity: .85; margin-top: 2px; }
+  .tag { display: inline-block; background: #e5dcf0; color: #5b3a83; font-size: .7rem; font-weight: bold; padding: 1px 6px; border-radius: 10px; margin-left: 6px; vertical-align: middle; }
+
+  .answers { font-size: .78rem; color: #6f7b73; line-height: 1.7; background: #f8faf8; border-radius: 8px; padding: 8px 12px; }
+  .act { display: flex; gap: 10px; margin-top: 10px; }
+  .act button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-size: .93rem; font-weight: bold; cursor: pointer; font-family: inherit; }
+  .act .main { background: var(--brand); color: #fff; }
+  .act .main:hover { background: var(--brand-dk); }
+  .act .sub { background: #e8eee9; color: var(--ink); }
+
+  .meta { max-width: 600px; width: 100%; font-size: .72rem; color: #8a958d; line-height: 1.7; margin-top: 14px; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    #card { box-shadow: none; max-width: none; }
+    .foot, .act, .noprint { display: none !important; }
+    .doc, .banner { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  }
+
+  .send { margin-top: 16px; background: #f3f8f4; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; }
+  .send label { font-size: .82rem; font-weight: bold; color: var(--brand-dk); display: block; margin-bottom: 6px; }
+  .send input { width: 100%; font-size: 1rem; padding: 9px 10px; border: 1px solid #c9d6cc; border-radius: 8px; font-family: inherit; }
+  .send .row { display: flex; gap: 8px; margin-top: 10px; }
+  .send button { flex: 1; padding: 12px 8px; border: none; border-radius: 10px; font-size: .92rem; font-weight: bold; cursor: pointer; font-family: inherit; }
+  .send .line { background: #06c755; color: #fff; }
+  .send .copy { background: #e8eee9; color: var(--ink); }
+  .send .hint { font-size: .74rem; color: #6f7b73; margin-top: 8px; line-height: 1.6; }
+  @media print { .send { display: none !important; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="co">株式会社平成造園　社内用</div>
+  <h1>病気・ケガで休むときナビ</h1>
+  <p>質問に答えると、使える制度（労災・健康保険）と、事務所に出すものがわかります。<br>まずは早めに事務所へ連絡してください。</p>
+</header>
+
+<div id="card"></div>
+
+<div class="meta noprint">
+  2026年11月時点の労災保険・協会けんぽの取扱いにもとづく目安です。最終的な判断は労働基準監督署・協会けんぽ・事務所で行います。
+  入力した内容は、自分で LINE などに送らない限り、どこにも送られません（氏名だけ、次に入れる手間をはぶくため、この端末に覚えます）。
+  <br><a href="index.html">← 手続きナビの入口へ</a>
+</div>
+
+<script>
+const INIT = { step: 'q1', f: {}, answers: [] };
+let state = JSON.parse(JSON.stringify(INIT));
+let stack = [];
+let choices = [];
+
+function go(next, o = {}) {
+  stack.push(JSON.stringify(state));
+  const s = { ...state, step: next, f: { ...state.f, ...(o.f || {}) } };
+  s.answers = [...state.answers, ...[].concat(o.ans || [])];
+  state = s; animate();
+}
+function back() { if (!stack.length) return; state = JSON.parse(stack.pop()); render(); }
+function restart() { stack = []; state = JSON.parse(JSON.stringify(INIT)); animate(); }
+function pick(i) { choices[i](); }
+function animate() {
+  const c = document.getElementById('card');
+  c.classList.add('fade-out');
+  setTimeout(() => { c.classList.remove('fade-out'); render(); window.scrollTo(0, 0); }, 160);
+}
+
+const STEPS = {
+  q1: {
+    part: 1, label: 'どうしましたか', qNum: 'Q1',
+    question: 'どういうときのケガ・病気ですか？',
+    note: '仕事中・通勤中のケガは「労災」になり、健康保険（保険証）は使いません。迷ったら「仕事中」を選んで事務所に相談してください。',
+    type: 'choice',
+    choices: [
+      { label: '仕事中のケガ・病気', sub: '現場・作業場・移動中の作業など（熱中症・蜂刺されなども）', fn: () => go('qRousaiDays', { f: { kind: 'gyomu' }, ans: '仕事中のケガ・病気' }) },
+      { label: '通勤中のケガ', sub: '家と会社・現場の行き帰り（ふつうの道順）', fn: () => go('qRousaiDays', { f: { kind: 'tsukin' }, ans: '通勤中のケガ' }) },
+      { label: '仕事とは関係ないケガ・病気', sub: '休みの日のケガ、病気、手術、入院など', fn: () => go('qAge', { f: { kind: 'shibyo' }, ans: '仕事以外のケガ・病気' }) },
+    ],
+  },
+  qRousaiDays: {
+    part: 2, label: '労災', qNum: 'Q2',
+    question: '仕事を休みますか？',
+    type: 'choice',
+    choices: [
+      { label: '休まない（病院に行くだけ）', fn: () => go('qNyuin', { f: { days: 0 }, ans: '休まない' }) },
+      { label: '休むのは3日以内', fn: () => go('qNyuin', { f: { days: 3 }, ans: '休みは3日以内' }) },
+      { label: '4日以上休む（見込み）', fn: () => go('qNyuin', { f: { days: 4 }, ans: '4日以上休む見込み' }) },
+    ],
+  },
+  qAge: {
+    part: 2, label: '健康保険', qNum: 'Q2',
+    question: 'あなたは75歳以上ですか？',
+    note: '75歳以上の方は、協会けんぽではなく「後期高齢者医療」の保険証（資格確認書）を使います。',
+    type: 'yesno',
+    onYes: () => go('qShibyoDays', { f: { over75: true }, ans: '75歳以上' }),
+    onNo: () => go('qShibyoDays', { f: { over75: false }, ans: '75歳未満' }),
+  },
+  qShibyoDays: {
+    part: 2, label: '健康保険', qNum: 'Q3',
+    question: '仕事を休みますか？',
+    note: '休みが<b>連続3日</b>（有休・公休日も数えます）続いたあと、<b>4日目以降</b>にまだ働けない日があると、健康保険から「傷病手当金」が出ます。',
+    type: 'choice',
+    choices: [
+      { label: '休まない（通院だけ）', fn: () => go('qNyuin', { f: { days: 0 }, ans: '休まない' }) },
+      { label: '休むのは3日以内', fn: () => go('qNyuin', { f: { days: 3 }, ans: '休みは3日以内' }) },
+      { label: '4日以上休む（見込み）', fn: () => go('qNyuin', { f: { days: 4 }, ans: '4日以上休む見込み' }) },
+    ],
+  },
+  qNyuin: {
+    part: 3, label: '入院・手術', qNum: 'Q4',
+    question: '入院や手術がありますか？（予定を含む）',
+    type: 'choice',
+    choices: [
+      { label: '入院する', sub: '手術があるかどうかは問いません', fn: () => go('result', { f: { nyuin: true }, ans: '入院あり' }) },
+      { label: '入院はしないが、外来で手術をする', fn: () => go('result', { f: { shujutsu: true }, ans: '外来の手術あり' }) },
+      { label: 'どちらもない', fn: () => go('result', { ans: '入院・手術なし' }) },
+    ],
+  },
+};
+
+const ORDER = ['q1', 'qRousaiDays', 'qAge', 'qShibyoDays', 'qNyuin'];
+function pct() { const i = ORDER.indexOf(state.step); return i < 0 ? 100 : Math.round(((i + 1) / (ORDER.length + 1)) * 100); }
+const val = v => typeof v === 'function' ? v() : v;
+const PART = { 1: ['p1', '第1部'], 2: ['p2', '第2部'], 3: ['p3', '第3部'] };
+
+function render() {
+  const card = document.getElementById('card');
+  if (state.step === 'result') return renderResult(card);
+  const d = STEPS[state.step];
+  choices = []; let btns = '';
+  if (d.type === 'yesno') {
+    choices = [d.onYes, d.onNo];
+    btns = `<div class="btns"><button class="btn btn-yes" onclick="pick(0)">はい</button><button class="btn btn-no" onclick="pick(1)">いいえ</button></div>`;
+  } else {
+    choices = d.choices.map(c => c.fn);
+    btns = `<div class="btns v">` + d.choices.map((c, i) =>
+      `<button class="btn btn-ch" onclick="pick(${i})">${c.label}${c.sub ? `<small>${c.sub}</small>` : ''}</button>`).join('') + `</div>`;
+  }
+  const note = val(d.note);
+  card.innerHTML = `
+    <div class="banner ${PART[d.part][0]}">${PART[d.part][1]}　${d.label}</div>
+    <div class="progress-wrap"><div class="progress-label">${d.qNum}</div><div class="bar"><div style="width:${pct()}%"></div></div></div>
+    <div class="body">
+      <div class="q-num">${d.qNum}</div>
+      <div class="question">${val(d.question)}</div>
+      ${note ? `<div class="note${d.noteWarn ? ' warn' : ''}">${note}</div>` : ''}
+      ${btns}
+    </div>
+    <div class="foot"><button class="link" onclick="back()" ${stack.length ? '' : 'disabled'}>← 前の質問に戻る</button>
+      <button class="link r" onclick="restart()">最初から</button></div>`;
+}
+
+const req = (label, note) => `<div class="doc req"><span class="ic">📄</span><span>${label}${note ? `<small>${note}</small>` : ''}</span></div>`;
+const info = (label, note) => `<div class="doc info"><span class="ic">ℹ️</span><span>${label}${note ? `<small>${note}</small>` : ''}</span></div>`;
+const self = (label, note) => `<div class="doc self"><span class="ic">💰</span><span>${label}${note ? `<small>${note}</small>` : ''}</span></div>`;
+const answersHtml = () => `<div class="sec"><div class="sec-t">あなたの回答</div><div class="answers">${state.answers.map(a => '・' + a).join('<br>')}</div></div>`;
+const actions = () => sendBox() + `<div class="act"><button class="main" onclick="window.print()">🖨 印刷する</button><button class="sub" onclick="restart()">↺ 最初から</button></div>`;
+const foot = () => `<div class="foot"><button class="link" onclick="back()">← 前の質問に戻る</button></div>`;
+
+function renderResult(card) {
+  const f = state.f;
+  const rousai = f.kind === 'gyomu' || f.kind === 'tsukin';
+  const big = f.nyuin || f.shujutsu;
+  let a = '', b = '', c = '', d = '';
+  let badge, title;
+  if (rousai) {
+    badge = '🦺 労災（' + (f.kind === 'gyomu' ? '業務災害' : '通勤災害') + '）';
+    title = '健康保険（保険証）は使わず、労災で治療します';
+    a += info('<b>すぐ事務所に連絡</b>してください（いつ・どこで・何をしていて・どうなったか）', '現場の責任者にも伝えてください。事務所でケガの状況をお聞きし、書類を用意します');
+    a += info('病院の窓口で「<b>仕事中（通勤中）のケガ</b>です」と伝え、<b>保険証は出さない</b>', '保険証で受診してしまったときは、すぐ病院と事務所に伝えてください（後から切り替えができます）');
+    a += req('労災の請求書（事務所が用意します）', f.kind === 'gyomu'
+      ? '労災の指定病院なら「療養補償給付たる療養の給付請求書」（様式第5号）を病院に出すと、窓口で払わなくてよくなります。指定外の病院でいったん払ったときは、領収書を事務所へ'
+      : '通勤中のケガは「療養給付たる療養の給付請求書」（様式第16号の3）。指定外の病院でいったん払ったときは、領収書を事務所へ');
+    if (f.days >= 4) {
+      b += self('<b>4日目から</b>、労災保険から休業の補償が出ます', '休んだ日1日につき、給料の約8割（休業（補償）給付60%＋休業特別支給金20%。給付基礎日額＝ケガの前3か月の給料の平均で計算）。1か月ごとに請求します');
+      b += self(f.kind === 'gyomu' ? '最初の3日間は、会社が給料の6割を払います' : '最初の3日間（待期）は、労災からも会社からも出ません', f.kind === 'gyomu' ? '労働基準法の休業補償（平均賃金の60%）' : '有休を使うこともできます');
+      b += req('振込先の通帳のコピー（休業の補償の振込先）');
+    } else if (f.days > 0) {
+      b += self(f.kind === 'gyomu' ? '休むのが3日以内なら、会社が休んだ日の給料の6割を払います' : '休むのが3日以内なら、労災の休業の補償は出ません', f.kind === 'gyomu' ? '労働基準法の休業補償（平均賃金の60%）。有休を使うこともできます' : '有休を使うこともできます');
+    }
+    c += info('会社で入っている補償制度から、<b>入院・通院の日数に応じた補償</b>が出る場合があります（仕事中・通勤中のケガ）', '病院の<b>領収書・診療明細書・診断書</b>は捨てずに事務所へ');
+  } else {
+    badge = '🏥 健康保険（' + (f.over75 ? '後期高齢者医療' : '協会けんぽ') + '）';
+    title = '保険証（マイナ保険証・資格確認書）で受診します';
+    if (f.days >= 4) {
+      if (f.over75) {
+        b += info('75歳以上の方には、<b>傷病手当金はありません</b>', '後期高齢者医療には休業中の手当の仕組みがないためです。休む日は有休を使えます');
+      } else {
+        b += self('<b>傷病手当金</b>：連続3日休んだあと、4日目以降の休んだ日に、1日あたり給料（標準報酬日額）の<b>約3分の2</b>が出ます', '公休日（日曜など）も対象。有休を使った日は出ません（待期の3日には数えます）。最長で通算1年6か月');
+        b += req('傷病手当金の申請書（事務所が用意します）', 'あなたが書く欄と、<b>お医者さんに証明してもらう欄</b>があります。休み終わってから（長いときは1か月ごと）申請します。審査は2週間ほど');
+        b += req('振込先の通帳のコピー');
+      }
+    } else if (f.days > 0) {
+      b += info('休むのが3日以内なら、傷病手当金は出ません', '有休を使うこともできます');
+    }
+    if (f.days > 0) b += info('病気・ケガで休むときは、<b>診断書</b>を出してもらうことがあります', '長く休んだあと仕事に戻るときも、事務所に相談してください');
+  }
+  if (big) {
+    c += info('<b>医療費が高額になりそうなとき</b>：1か月の窓口負担には上限があります（高額療養費）', rousai ? '労災なら窓口負担は原則ありません' : '<b>マイナ保険証</b>で受診すれば、窓口の支払いが自動で上限までになります。紙の資格確認書の方は、事前に「限度額適用認定証」を事務所に頼んでください');
+    c += info('入院・手術をしたら、<b>病院の領収書と診療明細書</b>を捨てずに事務所へ', '会社の見舞金や、会社で入っている保険の請求に使います（あとで事務所から説明します）');
+  }
+  d += info('休む期間や、仕事に戻れる見込みがわかったら事務所へ', '有休の使い方（有休にするか、手当を受けるか）も相談できます');
+
+  card.innerHTML = `
+    <div class="banner ok">結果</div>
+    <div class="body">
+      <div class="badge ok">${badge}</div>
+      <div class="r-title">${title}</div>
+      <div class="sec"><div class="sec-t">まずすること</div>${a || info('保険証（マイナ保険証・資格確認書）で受診してください')}</div>
+      ${b ? `<div class="sec"><div class="sec-t">休むときのお金</div>${b}</div>` : ''}
+      ${c ? `<div class="sec"><div class="sec-t">入院・手術・会社の制度</div>${c}</div>` : ''}
+      <div class="sec"><div class="sec-t">そのあと</div>${d}</div>
+      ${answersHtml()}
+      ${actions()}
+    </div>${foot()}`;
+}
+
+const NAVI_NAME = '病気・ケガで休むときナビ';
+// ===== 結果を事務所へ送る（LINE） =====
+let savedName = '';
+try { savedName = localStorage.getItem('navi_name') || ''; } catch (e) {}
+function sendBox() {
+  return `<div class="send">
+    <label for="nm">あなたの氏名（送るときに入ります）</label>
+    <input id="nm" type="text" placeholder="例：平成 太郎" value="${savedName.replace(/"/g, '')}" oninput="savedName=this.value;try{localStorage.setItem('navi_name',this.value)}catch(e){}">
+    <div class="row"><button class="line" onclick="sendLine()">LINEで事務所に送る</button><button class="copy" onclick="copyText()">文章をコピー</button></div>
+    <div class="hint">LINEが開いたら、送り先に事務所の担当者（またはグループ）を選んでください。マイナンバーなどは入りません。</div>
+  </div>`;
+}
+function resultText() {
+  const name = (document.getElementById('nm')?.value || '').trim();
+  const lines = [`【${NAVI_NAME}の結果】`, `氏名：${name || '（未入力）'}`];
+  const badge = document.querySelector('.badge');
+  if (badge) lines.push('判定：' + badge.innerText.replace(/^[^ぁ-んァ-ヶ一-龠A-Za-z0-9]+/, '').trim());
+  document.querySelectorAll('#card .sec').forEach(sec => {
+    const h = sec.querySelector('.sec-t');
+    if (!h || h.innerText.trim() === '家族の書き方') return;
+    lines.push('', '■' + h.innerText.trim());
+    const docs = sec.querySelectorAll('.doc');
+    if (docs.length) {
+      docs.forEach(d => {
+        const span = d.querySelector('span:not(.ic)');
+        if (!span) { lines.push('・' + d.innerText.replace(/^[✓✔]\s*/, '').trim()); return; }
+        let label = '';
+        span.childNodes.forEach(n => { if (n.nodeType === 3 || (n.tagName === 'B')) label += n.textContent; });
+        lines.push('・' + label.trim());
+      });
+    } else {
+      const ol = sec.querySelector('ol');
+      if (ol) return lines.pop() && lines.pop();
+      sec.querySelector('.answers')?.innerText.split('\n').forEach(a => a.trim() && lines.push(a.trim()));
+    }
+  });
+  return lines.join('\n');
+}
+function sendLine() {
+  const url = 'https://line.me/R/share?text=' + encodeURIComponent(resultText());
+  window.location.href = url;
+}
+async function copyText() {
+  const t = resultText();
+  try { await navigator.clipboard.writeText(t); alert('コピーしました。LINEやメールに貼り付けて送ってください。'); }
+  catch (e) { prompt('この文章をコピーしてください', t); }
+}
+
+render();
+</script>
+</body>
+</html>
